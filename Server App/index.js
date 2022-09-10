@@ -1,7 +1,12 @@
 const express = require('express');
 const mysql = require('mysql');
+var multer = require('multer');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const app = express();
+
+let date_ob = new Date();
 
 // const customer = require("./routes/customer");
 // const product = require("./routes/product");
@@ -15,6 +20,10 @@ const app = express();
 // app.use("/",transaction);
 // app.use("/",user);
 
+app.use(bodyParser.urlencoded({extended:false}));
+
+app.use(cors());
+
 const pool = mysql.createPool({
   host:"localhost",
   database:"db_laundry",
@@ -24,6 +33,199 @@ const pool = mysql.createPool({
 
 app.get("/hello-world", (req,res)=>{
   return res.status(200).send("Hello World !!!");
+});
+
+var filename ="";
+
+//Set Storage Engine
+const storage=multer.diskStorage({
+  destination:'./public/uploads',
+  filename:function(req,file,cb){
+    filename = file.originalname;
+    cb(null,filename);
+  }
+});
+
+let upload = multer({
+  storage: storage,
+  fileFilter:function(req,file,cb){
+    checkFileType(file,cb);
+  }
+});
+
+function checkFileType(file,cb){
+  const filetypes = /jpeg|jpg|png|gif/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype=filetypes.test(file.mimetype);
+  if(mimetype&&extname){
+    return cb(null,true);
+  }
+  else{
+    cb('Error: Image Only !!');
+  }
+}
+
+//========== Transaction ==========
+
+app.post('/api/addNewTransaction', function(req,res){
+
+  // h_trans data
+  var date = date_ob.getDate();
+  var month = date_ob.getMonth()+1;
+  var year = date_ob.getYear() % 100;
+
+  var id = "T";
+  var estimation = req.body.estimation;
+  var total_trans = req.body.total_trans;
+  var create_id = "TC";
+  var create_ip = req.socket.localAddress;
+  var notes= req.body.notes;
+  var status = req.body.status;
+  var customer_id = req.body.customer_id;
+
+  var count_id=0;
+
+  if(date<10){
+    id = id + '0' + date;
+    create_id = create_id + '0' + date;
+  }
+  else{
+    id = id+date;
+    create_id = create_id+date;
+  }
+
+  if(month<10){
+    id = id + '0' + month;
+    create_id = create_id + '0' + month;
+  }
+  else{
+    id = id+month;
+    create_id = create_id+month;
+  }
+
+  if(year<10){
+    id = id + '0' + year;
+    create_id = create_id + '0' + year;
+  }
+  else{
+    id = id+year;
+    create_id = create_id+year;
+  }
+
+  pool.getConnection((err,conn)=>{
+    conn.query(`select * from h_trans where h_trans_id LIKE '%${id}%'`, function(req,result){
+      if(err) return res.status(500).send(err)
+      else{
+        count_id = result.length+1;
+
+        if(count_id<10){
+          id = id+'000'+count_id;
+          create_id = create_id+'00'+count_id;
+        }
+        else if(count_id<100){
+          id = id+'00'+count_id;
+          create_id = create_id+'0'+count_id;
+        }
+        else{
+          id=id+'0'+count_id;
+          create_id=create_id+count_id;
+        }
+
+        var sql = `INSERT INTO h_trans (h_trans_id,h_trans_estimation,h_trans_total_trans,h_trans_create_id,h_trans_create_ip,h_trans_notes,h_trans_status,FK_customer_id) VALUES ("${id}","${estimation}","${total_trans}","${create_id}","${create_ip}","${notes}","${status}","${customer_id}")`
+
+        pool.getConnection((err,conn)=>{
+          conn.query(sql,function(req,result){
+            if(err) return res.status(500).send(err)
+            else{
+              return res.status(200).send(id);
+            }
+          })
+          conn.release();
+        })
+      }
+    })
+    conn.release();
+  })
+});
+
+app.post('/api/addNewTransactionDetail', function(req,res){
+
+  // d_trans data
+  var date = date_ob.getDate();
+  var month = date_ob.getMonth()+1;
+  var year = date_ob.getYear() % 100;
+
+  var id = "DT";
+  var h_product_id = req.body.h_product_id;
+  var h_trans_id = req.body.h_trans_id;
+  var status = req.body.status;
+  var notes = req.body.notes;
+  var create_id = "DC";
+  var create_ip = req.socket.localAddress;
+
+  var count_id=0;
+
+  if(date<10){
+    id = id + '0' + date;
+    create_id = create_id + '0' + date;
+  }
+  else{
+    id = id+date;
+    create_id = create_id+date;
+  }
+
+  if(month<10){
+    id = id + '0' + month;
+    create_id = create_id + '0' + month;
+  }
+  else{
+    id = id+month;
+    create_id = create_id+month;
+  }
+
+  if(year<10){
+    id = id + '0' + year;
+    create_id = create_id + '0' + year;
+  }
+  else{
+    id = id+year;
+    create_id = create_id+year;
+  }
+
+  pool.getConnection((err,conn)=>{
+    conn.query(`select * from d_trans where d_trans_id LIKE '%${id}%'`, function(req,result){
+      if(err) return res.status(500).send(err)
+      else{
+        count_id = result.length+1;
+
+        if(count_id<10){
+          id = id+'00'+count_id;
+          create_id = create_id+'00'+count_id;
+        }
+        else if(count_id<100){
+          id = id+'0'+count_id;
+          create_id = create_id+'0'+count_id;
+        }
+        else{
+          id=id+count_id;
+          create_id=create_id+count_id;
+        }
+
+        var sql = `INSERT INTO d_trans (d_trans_id,d_trans_create_id,d_trans_create_ip,d_trans_note,d_trans_status,FK_h_product_id,FK_h_trans_id) VALUES ("${id}","${create_id}","${create_ip}","${notes}","${status}","${h_product_id}","${h_trans_id}")`;
+
+        pool.getConnection((err,conn)=>{
+          conn.query(sql,function(req,result){
+            if(err) return res.status(500).send(err)
+            else{
+              return res.status(200).send(id);
+            }
+          })
+          conn.release();
+        })
+      }
+    })
+    conn.release();
+  })
 });
 
 //========== Customer ==========
