@@ -162,6 +162,85 @@ app.post("/api/addNewCustomer", (req,res) =>{
 
 });
 
+//========== Privilege ==========
+
+app.post("/api/addUserPrivilege", (req,res)=>{
+
+  var date = date_ob.getDate();
+  var month = date_ob.getMonth()+1;
+  var year = date_ob.getYear() % 100;
+
+  var id = "UP";
+  var create_id = "UPC";
+  var create_ip = req.socket.localAddress;
+  var notes = req.body.notes;
+  var status = req.body.status;
+  var user_id = req.body.user_id;
+  var privilege_id = req.body.privilege_id;
+
+  var count_id = 0;
+
+
+  if(date<10){
+    id = id + '0' + date;
+    create_id = create_id + '0' + date;
+  }
+  else{
+    id = id+date;
+    create_id = create_id+date;
+  }
+
+  if(month<10){
+    id = id + '0' + month;
+    create_id = create_id + '0' + month;
+  }
+  else{
+    id = id+month;
+    create_id = create_id+month;
+  }
+
+  if(year<10){
+    id = id + '0' + year;
+    create_id = create_id + '0' + year;
+  }
+  else{
+    id = id+year;
+    create_id = create_id+year;
+  }
+
+  pool.getConnection((err,conn)=>{
+    conn.query(`SELECT * FROM user-privilege WHERE user_privilege_id LIKE '%${id}%'`, function(req,result){
+      count_id = result.length +1;
+
+      if(count_id<10){
+        id = id+'00'+count_id;
+        create_id = create_id+'0'+count_id;
+      }
+      else if(count_id<100){
+        id = id+'0'+count_id;
+        create_id = create_id+count_id;
+      }
+      else{
+        id=id+count_id;
+        create_id=create_id+count_id;
+      }
+
+      var sql = `INSERT INTO user-privilege (user_privilege_id,user_privilege_create_id,user_privilege_create_ip,user_privilege_notes, user_privilege_status, FK_user_id, FK_privilege_id) VALUES ('${id}','${create_id}','${create_ip}','${notes}','${status}','${user_id}','${privilege_id}')`;
+
+      pool.getConnection((err,conn)=>{
+        conn.query(sql,function(req,result){
+          if(err) return res.status(500).send(err)
+          else{
+            return res.status(200).send(id);
+          }
+        })
+        conn.release();
+      })
+    })
+    conn.release();
+  })
+});
+
 //========== Product ==========
 
 app.get("/api/list-product", (req,res) => {
