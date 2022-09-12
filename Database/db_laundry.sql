@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 31, 2022 at 07:30 PM
+-- Generation Time: Sep 12, 2022 at 03:54 AM
 -- Server version: 10.4.24-MariaDB
 -- PHP Version: 8.1.6
 
@@ -62,8 +62,8 @@ INSERT INTO `customer` (`customer_id`, `customer_name`, `customer_phone_number`,
 DROP TABLE IF EXISTS `d_trans`;
 CREATE TABLE `d_trans` (
   `d_trans_id` varchar(11) NOT NULL,
-  `d_trans_main_photo` varchar(255) NOT NULL,
-  `d_trans_main_note` text NOT NULL,
+  `d_trans_main_photo` varchar(255) DEFAULT NULL,
+  `d_trans_main_note` text DEFAULT NULL,
   `d_trans_top_photo` varchar(255) DEFAULT NULL,
   `d_trans_top_note` text DEFAULT NULL,
   `d_trans_left_photo` varchar(255) DEFAULT NULL,
@@ -90,6 +90,7 @@ CREATE TABLE `d_trans` (
 --
 
 INSERT INTO `d_trans` (`d_trans_id`, `d_trans_main_photo`, `d_trans_main_note`, `d_trans_top_photo`, `d_trans_top_note`, `d_trans_left_photo`, `d_trans_left_note`, `d_trans_right_photo`, `d_trans_right_notes`, `d_trans_below_photo`, `d_trans_below_notes`, `d_trans_create_id`, `d_trans_create_date`, `d_trans_create_ip`, `d_trans_update_id`, `d_trans_update_date`, `d_trans_update_ip`, `d_trans_note`, `d_trans_status`, `FK_h_product_id`, `FK_user_id`, `FK_h_trans_id`) VALUES
+('DT100922001', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'DC100922001', '2022-09-10', '::1', NULL, '2022-09-10', NULL, 'data dummy', 1, 'HP310722001', NULL, 'T1009220001'),
 ('DT310722001', 'adsf', 'adf', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'DTC31072201', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'HP310722001', NULL, 'T3107220001'),
 ('DT310722002', 'asdfas', 'adfasdf', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'DTC31072202', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'HP310722002', NULL, 'T3107220001');
 
@@ -150,7 +151,8 @@ CREATE TABLE `h_trans` (
 --
 
 INSERT INTO `h_trans` (`h_trans_id`, `h_trans_estimation`, `h_trans_date_trans`, `h_trans_total_trans`, `h_trans_create_id`, `h_trans_create_date`, `h_trans_create_ip`, `h_trans_update_id`, `h_trans_update_date`, `h_trans_update_ip`, `h_trans_notes`, `h_trans_status`, `FK_customer_id`) VALUES
-('T3107220001', '3 hari', '2022-07-31', 100000, 'TC310722001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'C3107220001');
+('T3107220001', '3 hari', '2022-07-31', 100000, 'TC310722001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'C3107220001'),
+('T1009220001', '1 hari', '2022-09-10', 250000, 'TC100922001', '2022-09-10', '::1', NULL, '2022-09-10', NULL, 'data dummy coba api', 1, 'C3107220001');
 
 -- --------------------------------------------------------
 
@@ -243,6 +245,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`user_id`, `user_name`, `user_password`, `user_create_id`, `user_create_date`, `user_create_ip`, `user_update_id`, `user_update_date`, `user_update_ip`, `user_notes`, `user_status`) VALUES
+('U1009220001', 'doremi', 'doremi', 'UC100922001', '2022-09-10', '::1', NULL, '2022-09-10', NULL, 'dummy data', 1),
 ('U3107220001', 'bluelightning40', 'bluelightning40', 'UC310722001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1);
 
 -- --------------------------------------------------------
@@ -279,6 +282,25 @@ INSERT INTO `user-privilege` (`user_privilege_id`, `user_privilege_create_id`, `
 ('UP310722006', 'UPC31072206', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'U3107220001', 'PR310722006'),
 ('UP310722007', 'UPC31072207', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'U3107220001', 'PR310722007'),
 ('UP310722008', 'UPC31072208', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'U3107220001', 'PR310722008');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_login`
+--
+
+DROP TABLE IF EXISTS `user_login`;
+CREATE TABLE `user_login` (
+  `login_id` varchar(11) NOT NULL,
+  `FK_user_id` varchar(11) NOT NULL,
+  `login_date` date NOT NULL DEFAULT current_timestamp(),
+  `login_ip` varchar(15) NOT NULL,
+  `login_status` tinyint(1) NOT NULL,
+  `login_create_id` varchar(11) NOT NULL,
+  `login_create_date` date NOT NULL DEFAULT current_timestamp(),
+  `login_update_id` varchar(11) DEFAULT NULL,
+  `login_update_date` date DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Indexes for dumped tables
