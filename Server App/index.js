@@ -210,7 +210,7 @@ app.post("/api/addUserPrivilege", (req,res)=>{
   }
 
   pool.getConnection((err,conn)=>{
-    conn.query(`SELECT * FROM user-privilege WHERE user_privilege_id LIKE '%${id}%'`, function(req,result){
+    conn.query(`SELECT * FROM user_privilege WHERE user_privilege_id LIKE '%${id}%'`, function(req,result){
       count_id = result.length +1;
 
       if(count_id<10){
@@ -226,7 +226,7 @@ app.post("/api/addUserPrivilege", (req,res)=>{
         create_id=create_id+count_id;
       }
 
-      var sql = `INSERT INTO user-privilege (user_privilege_id,user_privilege_create_id,user_privilege_create_ip,user_privilege_notes, user_privilege_status, FK_user_id, FK_privilege_id) VALUES ('${id}','${create_id}','${create_ip}','${notes}','${status}','${user_id}','${privilege_id}')`;
+      var sql = `INSERT INTO user_privilege (user_privilege_id,user_privilege_create_id,user_privilege_create_ip,user_privilege_notes, user_privilege_status, FK_user_id, FK_privilege_id) VALUES ('${id}','${create_id}','${create_ip}','${notes}','${status}','${user_id}','${privilege_id}')`;
 
       pool.getConnection((err,conn)=>{
         conn.query(sql,function(req,result){
@@ -239,6 +239,19 @@ app.post("/api/addUserPrivilege", (req,res)=>{
       })
     })
     conn.release();
+  })
+});
+
+app.get("/api/userPrivilege", (req,res)=>{
+  var username = req.query.username;
+
+  pool.getConnection((err,conn)=>{
+    conn.query(`select U.user_name, P.privilege_name from user U, user_privilege UP, privilege P where U.user_name = "${username}" AND UP.FK_user_id = U.user_id AND UP.FK_privilege_id = P.privilege_id`, (err,result)=>{
+      if(err) return res.status(500).send(err)
+      else{
+        return res.status(200).send(result)
+      }
+    })
   })
 });
 
@@ -808,7 +821,7 @@ app.post("/api/addNewUser", (req,res) =>{
 //========== Login User ==========
 
 app.post("/api/loginUser", (req,res)=>{
-  var username = req.body.username;
+  var username = req.query.username;
   var password = req.body.password;
 
   if(username!=undefined && password != undefined){
@@ -929,7 +942,7 @@ app.post("/api/loginUser", (req,res)=>{
 });
 
 app.post("/api/logoutUser", (req,res)=>{
-  var username = req.body.username;
+  var username = req.query.username;
 
   pool.getConnection((err,conn)=>{
     conn.query(`SELECT user_id FROM user WHERE user_name = '${username}'`, (err,result)=>{
