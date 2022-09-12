@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 12, 2022 at 03:54 AM
+-- Generation Time: Sep 12, 2022 at 06:31 AM
 -- Server version: 10.4.24-MariaDB
 -- PHP Version: 8.1.6
 
@@ -216,6 +216,8 @@ CREATE TABLE `product` (
 --
 
 INSERT INTO `product` (`product_id`, `product_name`, `product_price`, `product_stock`, `product_category`, `product_create_id`, `product_create_date`, `product_create_ip`, `product_update_id`, `product_update_date`, `product_update_ip`, `product_notes`, `product_status`) VALUES
+('P1209220001', 'Tali Sepatu', 150000, 50, 'produk', 'PC120922001', '2022-09-12', '::1', NULL, '2022-09-12', NULL, 'data dummy', 1),
+('P1209220002', 'Repair', 60000, 5, 'jasa', 'PC120922002', '2022-09-12', '::1', NULL, '2022-09-12', NULL, 'data dummy', 1),
 ('P3107220001', 'Wax', 25000, 50, 'produk', 'PC310722001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
 ('P3107220002', 'Deep Wash', 75000, 10, 'jasa', 'PC310722002', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1);
 
@@ -245,43 +247,8 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`user_id`, `user_name`, `user_password`, `user_create_id`, `user_create_date`, `user_create_ip`, `user_update_id`, `user_update_date`, `user_update_ip`, `user_notes`, `user_status`) VALUES
-('U1009220001', 'doremi', 'doremi', 'UC100922001', '2022-09-10', '::1', NULL, '2022-09-10', NULL, 'dummy data', 1),
+('U1209220001', 'doremi', '$2b$10$GZpvovlvXOcvcF/1HSIY5u3SwMBWhfFIdriKcb4rq3pUeBBkFcUki', 'UC120922001', '2022-09-12', '::1', NULL, '2022-09-12', NULL, 'dummy data', 1),
 ('U3107220001', 'bluelightning40', 'bluelightning40', 'UC310722001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user-privilege`
---
-
-DROP TABLE IF EXISTS `user-privilege`;
-CREATE TABLE `user-privilege` (
-  `user_privilege_id` varchar(11) NOT NULL,
-  `user_privilege_create_id` varchar(11) NOT NULL,
-  `user_privilege_create_date` date NOT NULL DEFAULT current_timestamp(),
-  `user_privilege_create_ip` varchar(15) NOT NULL,
-  `user_privilege_update_id` varchar(11) DEFAULT NULL,
-  `user_privilege_update_date` date DEFAULT current_timestamp(),
-  `user_privilege_update_ip` varchar(15) DEFAULT NULL,
-  `user_privilege_notes` text DEFAULT NULL,
-  `user_privilege_status` tinyint(1) NOT NULL,
-  `FK_user_id` varchar(11) NOT NULL,
-  `FK_privilege_id` varchar(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `user-privilege`
---
-
-INSERT INTO `user-privilege` (`user_privilege_id`, `user_privilege_create_id`, `user_privilege_create_date`, `user_privilege_create_ip`, `user_privilege_update_id`, `user_privilege_update_date`, `user_privilege_update_ip`, `user_privilege_notes`, `user_privilege_status`, `FK_user_id`, `FK_privilege_id`) VALUES
-('UP310722001', 'UPC31072201', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'U3107220001', 'PR310722001'),
-('UP310722002', 'UPC31072202', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'U3107220001', 'PR310722002'),
-('UP310722003', 'UPC31072203', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'U3107220001', 'PR310722003'),
-('UP310722004', 'UPC31072204', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'U3107220001', 'PR310722004'),
-('UP310722005', 'UPC31072205', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'U3107220001', 'PR310722005'),
-('UP310722006', 'UPC31072206', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'U3107220001', 'PR310722006'),
-('UP310722007', 'UPC31072207', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'U3107220001', 'PR310722007'),
-('UP310722008', 'UPC31072208', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'U3107220001', 'PR310722008');
 
 -- --------------------------------------------------------
 
@@ -301,6 +268,49 @@ CREATE TABLE `user_login` (
   `login_update_id` varchar(11) DEFAULT NULL,
   `login_update_date` date DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `user_login`
+--
+
+INSERT INTO `user_login` (`login_id`, `FK_user_id`, `login_date`, `login_ip`, `login_status`, `login_create_id`, `login_create_date`, `login_update_id`, `login_update_date`) VALUES
+('L1209220001', 'U1209220001', '2022-09-12', '::1', 0, 'LC120922001', '2022-09-12', 'LU120922001', '2022-09-12'),
+('L1209220002', 'U1209220001', '2022-09-12', '::1', 0, 'LC120922002', '2022-09-12', 'LU120922001', '2022-09-12');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_privilege`
+--
+
+DROP TABLE IF EXISTS `user_privilege`;
+CREATE TABLE `user_privilege` (
+  `user_privilege_id` varchar(11) NOT NULL,
+  `user_privilege_create_id` varchar(11) NOT NULL,
+  `user_privilege_create_date` date NOT NULL DEFAULT current_timestamp(),
+  `user_privilege_create_ip` varchar(15) NOT NULL,
+  `user_privilege_update_id` varchar(11) DEFAULT NULL,
+  `user_privilege_update_date` date DEFAULT current_timestamp(),
+  `user_privilege_update_ip` varchar(15) DEFAULT NULL,
+  `user_privilege_notes` text DEFAULT NULL,
+  `user_privilege_status` tinyint(1) NOT NULL,
+  `FK_user_id` varchar(11) NOT NULL,
+  `FK_privilege_id` varchar(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `user_privilege`
+--
+
+INSERT INTO `user_privilege` (`user_privilege_id`, `user_privilege_create_id`, `user_privilege_create_date`, `user_privilege_create_ip`, `user_privilege_update_id`, `user_privilege_update_date`, `user_privilege_update_ip`, `user_privilege_notes`, `user_privilege_status`, `FK_user_id`, `FK_privilege_id`) VALUES
+('UP310722001', 'UPC31072201', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U3107220001', 'PR310722001'),
+('UP310722002', 'UPC31072202', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U3107220001', 'PR310722002'),
+('UP310722003', 'UPC31072203', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U3107220001', 'PR310722003'),
+('UP310722004', 'UPC31072204', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U3107220001', 'PR310722004'),
+('UP310722005', 'UPC31072205', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U3107220001', 'PR310722005'),
+('UP310722006', 'UPC31072206', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U3107220001', 'PR310722006'),
+('UP310722007', 'UPC31072207', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U3107220001', 'PR310722007'),
+('UP310722008', 'UPC31072208', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U3107220001', 'PR310722008');
 
 --
 -- Indexes for dumped tables
@@ -343,9 +353,9 @@ ALTER TABLE `user`
   ADD PRIMARY KEY (`user_id`);
 
 --
--- Indexes for table `user-privilege`
+-- Indexes for table `user_privilege`
 --
-ALTER TABLE `user-privilege`
+ALTER TABLE `user_privilege`
   ADD PRIMARY KEY (`user_privilege_id`);
 COMMIT;
 
