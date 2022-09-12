@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 var multer = require('multer');
+var bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -607,13 +608,227 @@ app.post("/api/addNewUser", (req,res) =>{
           create_id=create_id+count_id;
         }
 
-        var sql = `INSERT INTO USER (user_id,user_name,user_password,user_create_id,user_create_ip,user_notes, user_status) VALUES ('${id}','${name}','${password}','${create_id}','${create_ip}','${notes}','${status}')`
+        var hashedPassword = "";
+
+        bcrypt.genSalt(10, (err,salt)=>{
+          bcrypt.hash(password, salt,(err,hash)=>{
+            if(err){
+              console.log(err);
+              return res.status(500).send(err);
+            }
+            else{
+              hashedPassword = hash;
+
+              if(hashedPassword!=""){
+                var sql = `INSERT INTO USER (user_id,user_name,user_password,user_create_id,user_create_ip,user_notes, user_status) VALUES ('${id}','${name}','${hashedPassword}','${create_id}','${create_ip}','${notes}','${status}')`
+
+                pool.getConnection((err,conn)=>{
+                  conn.query(sql,function(req,result){
+                    if(err) return res.status(500).send(err)
+                    else{
+                      return res.status(200).send(id);
+                    }
+                  })
+                  conn.release();
+                })
+              }
+              else{
+                return res.status(500).send("Internal Server Error");
+              }
+            }
+          });
+        });
+      }
+    })
+    conn.release();
+  })
+
+});
+
+//========== Login User ==========
+
+app.post("/api/loginUser", (req,res)=>{
+  var username = req.body.username;
+  var password = req.body.password;
+
+  if(username!=undefined && password != undefined){
+    pool.getConnection((err,conn)=>{
+      conn.query(`select user_password,user_id from user where user_name = '${username}'`, (err,result)=>{
+        if(err) res.status(500).send(err);
+        else{
+          if(result.length>0){
+            var dbPassword = result[0].user_password;
+            bcrypt.genSalt(10, (err,salt)=>{
+              bcrypt.compare(password, dbPassword,(err,isMatch)=>{
+                if(isMatch){
+
+                  var date = date_ob.getDate();
+                  var month = date_ob.getMonth()+1;
+                  var year = date_ob.getYear() % 100;
+
+                  var id = "L";
+                  var user_id = result[0].user_id;
+                  var ip = req.socket.localAddress;
+                  var status = 1;
+                  var create_id = "LC";
+
+                  var count_id = 0;
+
+                  if(date<10){
+                    id = id + '0' + date;
+                    create_id = create_id + '0' + date;
+                  }
+                  else{
+                    id = id+date;
+                    create_id = create_id+date;
+                  }
+
+                  if(month<10){
+                    id = id + '0' + month;
+                    create_id = create_id + '0' + month;
+                  }
+                  else{
+                    id = id+month;
+                    create_id = create_id+month;
+                  }
+
+                  if(year<10){
+                    id = id + '0' + year;
+                    create_id = create_id + '0' + year;
+                  }
+                  else{
+                    id = id+year;
+                    create_id = create_id+year;
+                  }
+
+                  pool.getConnection((err,conn)=>{
+                    conn.query(`select * from user_login where login_id LIKE "%${id}%"`,(err,result)=>{
+                      if(err) return res.status(500).send(err)
+                      else{
+                        count_id = result.length +1;
+
+                        if(count_id<10){
+                          id = id+'000'+count_id;
+                          create_id = create_id+'00'+count_id;
+                        }
+                        else if(count_id<100){
+                          id = id+'00'+count_id;
+                          create_id = create_id+'0'+count_id;
+                        }
+                        else{
+                          id=id+'0'+count_id;
+                          create_id=create_id+count_id;
+                        }
+
+                        pool.getConnection((err,conn)=>{
+                          conn.query(`SELECT * FROM user_login where FK_user_id = "${user_id}" and login_status = 1`, (err,result)=>{
+                            if(err) res.status(500).send(err)
+                            else{
+                              console.log(result.length)
+                              if(result.length == 0 ){
+                                var sql = `INSERT INTO USER_LOGIN (login_id,FK_user_id,login_ip,login_status,login_create_id) VALUES ('${id}','${user_id}','${ip}','${status}','${create_id}')`
+
+                                pool.getConnection((err,conn)=>{
+                                  conn.query(sql,function(req,result){
+                                    if(err) return res.status(500).send(err)
+                                    else{
+                                      return res.status(200).send(id);
+                                    }
+                                  })
+                                  conn.release();
+                                })
+                              }
+                              else{
+                                res.status(500).send("User Logged In !!");
+                              }
+                            }
+                          })
+                        })
+                      }
+                    });
+                    conn.release();
+                  });
+                }
+                else{
+                  res.status(500).send("Invalid Username or Password !!");
+                }
+              });
+            });
+          }
+          else{
+            res.status(400).send("Username Invalid !!");
+          }
+        }
+      })
+      conn.release();
+    })
+  }
+  else{
+    res.status(500).send("Username or Password Undefined!!");
+  }
+});
+
+app.post("/api/logoutUser", (req,res)=>{
+  var username = req.body.username;
+
+  pool.getConnection((err,conn)=>{
+    conn.query(`SELECT user_id FROM user WHERE user_name = '${username}'`, (err,result)=>{
+      if(err) res.status(500).send(err);
+      else{
+        var date = date_ob.getDate();
+        var month = date_ob.getMonth()+1;
+        var year = date_ob.getYear() % 100;
+
+        var user_id = result[0].user_id;
+
+        var update_id = "LU";
+
+        if(date<10){
+          update_id = update_id + '0' + date;
+        }
+        else{
+          update_id = update_id+date;
+        }
+
+        if(month<10){
+          update_id = update_id + '0' + month;
+        }
+        else{
+          update_id = update_id+month;
+        }
+
+        if(year<10){
+          update_id = update_id + '0' + year;
+        }
+        else{
+          update_id = update_id+year;
+        }
 
         pool.getConnection((err,conn)=>{
-          conn.query(sql,function(req,result){
-            if(err) return res.status(500).send(err)
+          conn.query(`SELECT * FROM user_login WHERE login_update_id LIKE "%${update_id}"`,(err,result)=>{
+            if(err) res.status(500).send(err)
             else{
-              return res.status(200).send(id);
+              var count_id =result.length+1;
+
+              if(count_id<10){
+                update_id = update_id+'00'+count_id;
+              }
+              else if(count_id<100){
+                update_id = update_id+'0'+count_id;
+              }
+              else{
+                update_id=update_id+count_id;
+              }
+
+              pool.getConnection((err,conn)=>{
+                conn.query(`UPDATE user_login SET login_status=0, login_update_date = CURDATE(), login_update_id = "${update_id}" WHERE FK_user_id = "${user_id}"`,(err,result)=>{
+                  if(err) res.status(500).send(err)
+                  else{
+                    res.status(200).send("user logged out !!");
+                  }
+                })
+                conn.release();
+              })
             }
           })
           conn.release();
@@ -621,8 +836,7 @@ app.post("/api/addNewUser", (req,res) =>{
       }
     })
     conn.release();
-  })
-
+  });
 });
 
 // ===========================================================================================
