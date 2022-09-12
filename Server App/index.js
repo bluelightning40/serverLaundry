@@ -256,6 +256,85 @@ app.get("/api/list-product", (req,res) => {
   })
 });
 
+app.post("/api/addNewProduct", (req,res) => {
+  var date = date_ob.getDate();
+  var month = date_ob.getMonth()+1;
+  var year = date_ob.getYear() % 100;
+
+  var name = req.body.name;
+  var price = req.body.price;
+  var stock = req.body.stock;
+  var category = "produk";
+  var create_id = "PC";
+  var id = "P";
+  var ip = req.socket.localAddress;
+  var notes = req.body.notes;
+  var status = req.body.status;
+
+  var count_id = 0;
+
+  if(date<10){
+    id = id + '0' + date;
+    create_id = create_id + '0' + date;
+  }
+  else{
+    id = id+date;
+    create_id = create_id+date;
+  }
+
+  if(month<10){
+    id = id + '0' + month;
+    create_id = create_id + '0' + month;
+  }
+  else{
+    id = id+month;
+    create_id = create_id+month;
+  }
+
+  if(year<10){
+    id = id + '0' + year;
+    create_id = create_id + '0' + year;
+  }
+  else{
+    id = id+year;
+    create_id = create_id+year;
+  }
+
+  pool.getConnection((err,conn)=>{
+    conn.query(`select * from product where product_id like "%${id}%"`,(err,result)=>{
+      if(err) return res.status(500).send(err)
+      else{
+        count_id = result.length + 1;
+
+        if(count_id<10){
+          id = id+'000'+count_id;
+          create_id = create_id+'00'+count_id;
+        }
+        else if(count_id<100){
+          id = id+'00'+count_id;
+          create_id = create_id+'0'+count_id;
+        }
+        else{
+          id=id+'0'+count_id;
+          create_id=create_id+count_id;
+        }
+
+        var sql = `INSERT INTO PRODUCT (product_id,product_name,product_price,product_stock,product_category,product_create_id, product_create_ip, product_notes,product_status) VALUES ('${id}','${name}','${price}','${stock}','${category}','${create_id}','${ip}','${notes}','${status}')`
+
+        pool.getConnection((err,conn)=>{
+          conn.query(sql,function(req,result){
+            if(err) return res.status(500).send(err)
+            else{
+              return res.status(200).send(id);
+            }
+          })
+          conn.release();
+        })
+      }
+    })
+  })
+});
+
 //========== Service ==========
 
 app.get("/api/list-service", (req,res) => {
@@ -267,6 +346,87 @@ app.get("/api/list-service", (req,res) => {
       }
     })
     conn.release();
+  })
+});
+
+app.post("/api/addNewService", (req,res) => {
+  var date = date_ob.getDate();
+  var month = date_ob.getMonth()+1;
+  var year = date_ob.getYear() % 100;
+
+  var name = req.body.name;
+  var price = req.body.price;
+  var stock = req.body.stock;
+  var category = "jasa";
+  var create_id = "PC";
+  var id = "P";
+  var ip = req.socket.localAddress;
+  var notes = req.body.notes;
+  var status = req.body.status;
+
+  var count_id = 0;
+
+  if(date<10){
+    id = id + '0' + date;
+    create_id = create_id + '0' + date;
+  }
+  else{
+    id = id+date;
+    create_id = create_id+date;
+  }
+
+  if(month<10){
+    id = id + '0' + month;
+    create_id = create_id + '0' + month;
+  }
+  else{
+    id = id+month;
+    create_id = create_id+month;
+  }
+
+  if(year<10){
+    id = id + '0' + year;
+    create_id = create_id + '0' + year;
+  }
+  else{
+    id = id+year;
+    create_id = create_id+year;
+  }
+
+  pool.getConnection((err,conn)=>{
+    conn.query(`select * from product where product_id like "%${id}%"`,(err,result)=>{
+      if(err) return res.status(500).send(err)
+      else{
+        count_id = result.length + 1;
+
+        console.log(result.length);
+
+        if(count_id<10){
+          id = id+'000'+count_id;
+          create_id = create_id+'00'+count_id;
+        }
+        else if(count_id<100){
+          id = id+'00'+count_id;
+          create_id = create_id+'0'+count_id;
+        }
+        else{
+          id=id+'0'+count_id;
+          create_id=create_id+count_id;
+        }
+
+        var sql = `INSERT INTO PRODUCT (product_id,product_name,product_price,product_stock,product_category,product_create_id, product_create_ip, product_notes,product_status) VALUES ('${id}','${name}','${price}','${stock}','${category}','${create_id}','${ip}','${notes}','${status}')`
+
+        pool.getConnection((err,conn)=>{
+          conn.query(sql,function(req,result){
+            if(err) return res.status(500).send(err)
+            else{
+              return res.status(200).send(id);
+            }
+          })
+          conn.release();
+        })
+      }
+    })
   })
 });
 
@@ -739,7 +899,7 @@ app.post("/api/loginUser", (req,res)=>{
                                 })
                               }
                               else{
-                                res.status(500).send("User Logged In !!");
+                                return res.status(500).send("User Logged In !!");
                               }
                             }
                           })
@@ -750,13 +910,13 @@ app.post("/api/loginUser", (req,res)=>{
                   });
                 }
                 else{
-                  res.status(500).send("Invalid Username or Password !!");
+                  return res.status(500).send("Invalid Username or Password !!");
                 }
               });
             });
           }
           else{
-            res.status(400).send("Username Invalid !!");
+            return res.status(400).send("Username Invalid !!");
           }
         }
       })
@@ -764,7 +924,7 @@ app.post("/api/loginUser", (req,res)=>{
     })
   }
   else{
-    res.status(500).send("Username or Password Undefined!!");
+    return res.status(500).send("Username or Password Undefined!!");
   }
 });
 
@@ -806,7 +966,7 @@ app.post("/api/logoutUser", (req,res)=>{
 
         pool.getConnection((err,conn)=>{
           conn.query(`SELECT * FROM user_login WHERE login_update_id LIKE "%${update_id}"`,(err,result)=>{
-            if(err) res.status(500).send(err)
+            if(err) return res.status(500).send(err)
             else{
               var count_id =result.length+1;
 
@@ -822,9 +982,9 @@ app.post("/api/logoutUser", (req,res)=>{
 
               pool.getConnection((err,conn)=>{
                 conn.query(`UPDATE user_login SET login_status=0, login_update_date = CURDATE(), login_update_id = "${update_id}" WHERE FK_user_id = "${user_id}"`,(err,result)=>{
-                  if(err) res.status(500).send(err)
+                  if(err) return res.status(500).send(err)
                   else{
-                    res.status(200).send("user logged out !!");
+                    return res.status(200).send("user logged out !!");
                   }
                 })
                 conn.release();
