@@ -28,7 +28,11 @@ router.post('/create', async (req, res, next) => {
     }
 
     // Jika unique, create user
-    const { id, createId, updateId } = await userNumberGenerator('user', 'U')
+    const { id, createId, updateId } = await userNumberGenerator(
+      connection,
+      'user',
+      'U'
+    )
     await connection.query(insertUserSQL, [
       id,
       name,

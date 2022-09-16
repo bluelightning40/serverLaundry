@@ -1,5 +1,4 @@
 const dayjs = require('dayjs')
-const db = require('../db')
 
 require('dotenv').config()
 
@@ -40,15 +39,14 @@ function inputChecks(
 
 /**
  * Generate id, createId, and updateId
+ * @param {Connection} connection - DB Connection
  * @param {String} tableName - Name of the table
  * @param {String} prefixId - String at the start of the id
  * @returns {String} id, createId, and updateId
  */
 
-async function userNumberGenerator(tableName, prefixId) {
+async function userNumberGenerator(connection, tableName, prefixId) {
   let dateString = dayjs().format('DDMMYY')
-  // Calculating User number
-  const connection = await db
   let query = `SELECT * FROM ${tableName} WHERE customer_id like '${prefixId}${dateString}%'`
   const [rows] = await connection.query(query)
 

@@ -104,13 +104,14 @@ router.post('/add', async (req, res, next) => {
     const { name, phone_number, email, address, notes, status } = req.body
     const create_ip = req.socket.localAddress
 
+    const connection = await db
     const { id, createId, updateId } = await userNumberGenerator(
+      connection,
       'customer',
       'C'
     )
 
     // Inserting
-    const connection = await db
     await connection.query(insertCustomerSQL, [
       id,
       name,
