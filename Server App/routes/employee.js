@@ -10,12 +10,18 @@ router.post('/create', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
-  const requiredInputs = ['name', 'username', 'password', 'status']
+  const requiredInputs = [
+    'name',
+    'username',
+    'password',
+    'status',
+    'privileges',
+  ]
 
   try {
     inputChecks(requiredInputs, req.body)
 
-    const { name, username, password, notes, status } = req.body
+    const { name, username, password, notes, status, privileges } = req.body
     const create_ip = req.socket.localAddress
 
     const connection = await db
@@ -46,7 +52,19 @@ router.post('/create', async (req, res, next) => {
       status,
     ])
 
-    // TODO: Update Table User Login
+    for (let i = 0; i < privileges.length; i++) {
+      const privilege = privileges[i]
+      const [rows] = await connection.query(
+        `SELECT * FROM privileges WHERE privilege_id = '${privilege}'`
+      )
+
+      if (rows.length === 0) {
+        throwError(400, 'Privileges tidak valid.', true)
+      }
+    }
+
+    // Insert user_privilege
+
     return res.status(retVal.status).json(retVal)
   } catch (error) {
     return next(error)

@@ -20,19 +20,22 @@ function inputChecks(
   isStrict = false,
   customError = {
     status: 400,
-    customMessage: `Missing inputs. Please read ${process.env.DOCUMENTATION_URL} for more information`,
+    customMessage: `Input ada yang kurang.`,
   }
 ) {
   if (Object.keys(body).length === 0) throw customError
 
   const isAllInputsExist = inputs.every((value) => value in body)
-  if (!isAllInputsExist) throw customError
+  if (!isAllInputsExist)
+    throwError(customError.status, customError.customMessage, true)
 
   for (const key in body) {
-    if (!body[key] && body[key] !== false) throw customError
+    if (!body[key] && body[key] !== false)
+      throwError(customError.status, customError.customMessage, true)
   }
 
-  if (isStrict && Object.keys(body).length != inputs.length) throw customError
+  if (isStrict && Object.keys(body).length != inputs.length)
+    throwError(customError.status, customError.customMessage, true)
 
   return true
 }
@@ -70,11 +73,19 @@ async function userNumberGenerator(connection, tableName, prefixId) {
  *
  * @param {Number} statusCode - HTTP response status code, refer to https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
  * @param {String} message - Error message
+ * @param {Boolean} addDocumentation - Add Documentation URL to message
  *
  */
 
-function throwError(statusCode, message) {
-  throw { status: statusCode, customMessage: message }
+function throwError(statusCode, message, addDocumentation = false) {
+  throw {
+    status: statusCode,
+    customMessage: `${message} ${
+      addDocumentation
+        ? `Tolong baca ${process.env.DOCUMENTATION_URL} untuk informasi lebih lanjut.`
+        : ''
+    }`,
+  }
 }
 
 module.exports = {

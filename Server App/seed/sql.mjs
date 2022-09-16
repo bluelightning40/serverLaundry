@@ -32,16 +32,18 @@ const createDTransTableSQL = `CREATE TABLE d_trans (
   d_trans_update_ip VARCHAR(15) DEFAULT NULL,
   d_trans_note TEXT DEFAULT NULL,
   d_trans_done BOOLEAN NOT NULL,
+  d_trans_quantity INT NOT NULL,
+  d_trans_subtotal BIGINT(20) NOT NULL,
   d_trans_status BOOLEAN NOT NULL,
   FK_h_product_id VARCHAR(11) NOT NULL,
   FK_user_id VARCHAR(11) DEFAULT NULL,
   FK_h_trans_id VARCHAR(11) NOT NULL
 )`
-const insertDTransSQL = `INSERT INTO d_trans (d_trans_id, d_trans_main_photo, d_trans_main_note, d_trans_top_photo, d_trans_top_note, d_trans_left_photo, d_trans_left_note, d_trans_right_photo, d_trans_right_note, d_trans_below_photo, d_trans_below_note, d_trans_create_id, d_trans_create_date, d_trans_create_ip, d_trans_update_id, d_trans_update_date, d_trans_update_ip, d_trans_note, d_trans_status, FK_h_product_id, FK_user_id, FK_h_trans_id) VALUES ?`
-const initialDTransSQL = `INSERT INTO d_trans (d_trans_id, d_trans_main_photo, d_trans_main_note, d_trans_top_photo, d_trans_top_note, d_trans_left_photo, d_trans_left_note, d_trans_right_photo, d_trans_right_note, d_trans_below_photo, d_trans_below_note, d_trans_create_id, d_trans_create_date, d_trans_create_ip, d_trans_update_id, d_trans_update_date, d_trans_update_ip, d_trans_note, d_trans_status, FK_h_product_id, FK_user_id, FK_h_trans_id) VALUES 
-('DT100922001', 'DTC100922001', '2022-09-10', '::1', NULL, '2022-09-10', NULL, 'data dummy', 0, 1, 'HP3107220001', NULL, 'T1009220001'),
-('DT310722001', 'DTC310722001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 0, 1, 'HP3107220001', NULL, 'T3107220001'),
-('DT310722002', 'DTC310722002', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 0, 1, 'HP3107220002', NULL, 'T3107220001')`
+const insertDTransSQL = `INSERT INTO d_trans (d_trans_id, d_trans_main_photo, d_trans_main_note, d_trans_top_photo, d_trans_top_note, d_trans_left_photo, d_trans_left_note, d_trans_right_photo, d_trans_right_note, d_trans_below_photo, d_trans_below_note, d_trans_create_id, d_trans_create_date, d_trans_create_ip, d_trans_update_id, d_trans_update_date, d_trans_update_ip, d_trans_note, d_trans_done, d_trans_quantity, d_trans_subtotal, d_trans_status, FK_h_product_id, FK_user_id, FK_h_trans_id) VALUES ?`
+const initialDTransSQL = `INSERT INTO d_trans (d_trans_id, d_trans_main_photo, d_trans_main_note, d_trans_top_photo, d_trans_top_note, d_trans_left_photo, d_trans_left_note, d_trans_right_photo, d_trans_right_note, d_trans_below_photo, d_trans_below_note, d_trans_create_id, d_trans_create_date, d_trans_create_ip, d_trans_update_id, d_trans_update_date, d_trans_update_ip, d_trans_note, d_trans_done, d_trans_quantity, d_trans_subtotal, d_trans_status, FK_h_product_id, FK_user_id, FK_h_trans_id) VALUES 
+('DT100922001', 'DTC100922001', '2022-09-10', '::1', NULL, '2022-09-10', NULL, 'data dummy', 0, 1, 1, 15000 'HP3107220001', NULL, 'T1009220001'),
+('DT310722001', 'DTC310722001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 0, 1, 1, 15000  'HP3107220001', NULL, 'T3107220001'),
+('DT310722002', 'DTC310722002', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 0, 1, 1, 15000  'HP3107220002', NULL, 'T3107220001')`
 
 // HTrans
 const dropHTransTableSQL = 'DROP TABLE IF EXISTS h_trans'
@@ -58,8 +60,6 @@ const createHTransTableSQL = `CREATE TABLE h_trans (
   h_trans_right_note TEXT DEFAULT NULL,
   h_trans_below_photo VARCHAR(255) DEFAULT NULL,
   h_trans_below_note TEXT DEFAULT NULL,
-  h_trans_estimation VARCHAR(255) NOT NULL,
-  h_trans_date DATETIME DEFAULT CURRENT_TIMESTAMP,
   h_trans_total BIGINT(20) NOT NULL,
   h_trans_create_id VARCHAR(12) NOT NULL,
   h_trans_create_date DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -68,13 +68,14 @@ const createHTransTableSQL = `CREATE TABLE h_trans (
   h_trans_update_date DATETIME DEFAULT CURRENT_TIMESTAMP,
   h_trans_update_ip VARCHAR(15) DEFAULT NULL,
   h_trans_note TEXT DEFAULT NULL,
+  h_trans_progress TINYINT(1) DEFAULT 0,
   h_trans_status BOOLEAN NOT NULL,
   FK_customer_id VARCHAR(11) NOT NULL
 )`
-const insertHTransSQL = `INSERT INTO h_trans (h_trans_id, h_trans_estimation, h_trans_date, h_trans_total, h_trans_create_id, h_trans_create_date, h_trans_create_ip, h_trans_update_id, h_trans_update_date, h_trans_update_ip, h_trans_note, h_trans_status, FK_customer_id) VALUES ?`
-const initialHTransSQL = `INSERT INTO h_trans (h_trans_id, h_trans_estimation, h_trans_date, h_trans_total, h_trans_create_id, h_trans_create_date, h_trans_create_ip, h_trans_update_id, h_trans_update_date, h_trans_update_ip, h_trans_note, h_trans_status, FK_customer_id) VALUES 
-('T3107220001', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '3 hari', '2022-07-31', 100000, 'TC3107220001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'C3107220001'),
-('T1009220001', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1 hari', '2022-09-10', 250000, 'TC1009220001', '2022-09-10', '::1', NULL, '2022-09-10', NULL, 'data dummy coba api', 1, 'C3107220001')`
+const insertHTransSQL = `INSERT INTO h_trans (h_trans_id, h_trans_total, h_trans_create_id, h_trans_create_date, h_trans_create_ip, h_trans_update_id, h_trans_update_date, h_trans_update_ip, h_trans_note, h_trans_status, FK_customer_id) VALUES ?`
+const initialHTransSQL = `INSERT INTO h_trans (h_trans_id, h_trans_total, h_trans_create_id, h_trans_create_date, h_trans_create_ip, h_trans_update_id, h_trans_update_date, h_trans_update_ip, h_trans_note, h_trans_status, FK_customer_id) VALUES 
+('T3107220001', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 100000, 'TC3107220001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'C3107220001'),
+('T1009220001', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 250000, 'TC1009220001', '2022-09-10', '::1', NULL, '2022-09-10', NULL, 'data dummy coba api', 1, 'C3107220001')`
 
 // HProduct
 const dropHProductTableSQL = 'DROP TABLE IF EXISTS h_product'
@@ -113,18 +114,19 @@ const createPrivilegeTableSQL = `CREATE TABLE privilege (
   privilege_status BOOLEAN NOT NULL
 )`
 const initialPrivilegeSQL = `INSERT INTO privilege (privilege_id, privilege_name, privilege_create_id, privilege_create_date, privilege_create_ip, privilege_update_id, privilege_update_date, privilege_update_ip, privilege_note, privilege_status) VALUES 
-('PR310722001', 'View Customer', 'PRC31072201', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
-('PR310722002', 'Create Customer', 'PRC31072202', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
-('PR310722003', 'Update Customer', 'PRC31072203', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
-('PR310722004', 'Delete Customer', 'PRC31072204', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
-('PR310722005', 'View Produk', 'PRC31072205', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
-('PR310722006', 'Create Produk', 'PRC31071220', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
-('PR310722007', 'Update Produk', 'PRC31072207', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
-('PR310722008', 'Delete Produk', 'PRC31072208', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
-('PR310722009', 'View Jasa', 'PRC31072209', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
-('PR310722010', 'Create Jasa', 'PRC31072210', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
-('PR310722011', 'Update Jasa', 'PRC31072211', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
-('PR310722012', 'Delete Jasa', 'PRC31072212', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1)`
+('PR310722001', 'Administrator', 'PRC310722001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('PR310722002', 'View Customer', 'PRC310722002', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('PR310722003', 'Create Customer', 'PRC310722003', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('PR310722004', 'Update Customer', 'PRC310722004', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('PR310722005', 'Delete Customer', 'PRC310722005', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('PR310722006', 'View Produk', 'PRC310722006', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('PR310722007', 'Create Produk', 'PRC3107122007', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('PR310722008', 'Update Produk', 'PRC310722008', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('PR310722009', 'Delete Produk', 'PRC310722009', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('PR310722010', 'View Jasa', 'PRC310722010', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('PR310722011', 'Create Jasa', 'PRC310722011', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('PR310722012', 'Update Jasa', 'PRC310722012', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('PR310722013', 'Delete Jasa', 'PRC310722013', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1)`
 
 // Product
 const dropProductTableSQL = 'DROP TABLE IF EXISTS product'
@@ -132,7 +134,9 @@ const createProductTableSQL = `CREATE TABLE product (
   product_id VARCHAR(11) NOT NULL,
   PRIMARY KEY (product_id),
   product_name VARCHAR(255) NOT NULL,
+  product_type VARCHAR(255) NOT NULL,
   product_price BIGINT(20) NOT NULL,
+  product_brand VARCHAR(255) DEFAULT NULL,
   product_stock int(11) NOT NULL,
   product_category TEXT NOT NULL,
   product_create_id VARCHAR(12) NOT NULL,
@@ -144,12 +148,12 @@ const createProductTableSQL = `CREATE TABLE product (
   product_note TEXT DEFAULT NULL,
   product_status BOOLEAN NOT NULL
 )`
-const insertProductSQL = `INSERT INTO product (product_id, product_name, product_price, product_stock, product_category, product_create_id, product_create_date, product_create_ip, product_update_id, product_update_date, product_update_ip, product_note, product_status) VALUES ?`
-const initialProductSQL = `INSERT INTO product (product_id, product_name, product_price, product_stock, product_category, product_create_id, product_create_date, product_create_ip, product_update_id, product_update_date, product_update_ip, product_note, product_status) VALUES
-('P1209220001', 'Tali Sepatu', 150000, 50, 'produk', 'PC120922001', '2022-09-12', '::1', NULL, '2022-09-12', NULL, 'data dummy', 1),
-('P1209220002', 'Repair', 60000, 5, 'jasa', 'PC120922002', '2022-09-12', '::1', NULL, '2022-09-12', NULL, 'data dummy', 1),
-('P3107220001', 'Wax', 25000, 50, 'produk', 'PC310722001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
-('P3107220002', 'Deep Wash', 75000, 10, 'jasa', 'PC310722002', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1)`
+const insertProductSQL = `INSERT INTO product (product_id, product_name, product_type, product_price, product_brand, product_stock, product_category, product_create_id, product_create_date, product_create_ip, product_update_id, product_update_date, product_update_ip, product_note, product_status) VALUES ?`
+const initialProductSQL = `INSERT INTO product (product_id, product_name, product_type, product_price, product_brand, product_stock, product_category, product_create_id, product_create_date, product_create_ip, product_update_id, product_update_date, product_update_ip, product_note, product_status) VALUES
+('P1209220001', 'Tali Sepatu', 'produk', 150000, 'nike', 50, 'aksesoris', 'PC120922001', '2022-09-12', '::1', NULL, '2022-09-12', NULL, 'data dummy', 1),
+('P1209220002', 'Steam Dry', 'jasa', 60000, NULL, 5, 'drying', 'PC120922002', '2022-09-12', '::1', NULL, '2022-09-12', NULL, 'data dummy', 1),
+('P3107220001', 'Wax', 'produk', 25000, 'kiwi', 50, 'habis pakai', 'PC310722001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
+('P3107220002', 'Deep Wash', 'jasa', 75000, NULL, 10, 'washing', 'PC310722002', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1)`
 
 // User
 const dropUserTableSQL = 'DROP TABLE IF EXISTS user'
@@ -206,14 +210,15 @@ const createUserPrivilegeTableSQL = `CREATE TABLE user_privilege (
 )`
 const insertUserPrivilegeSQL = `INSERT INTO user_privilege (user_privilege_id, user_privilege_create_id, user_privilege_create_date, user_privilege_create_ip, user_privilege_update_id, user_privilege_update_date, user_privilege_update_ip, user_privilege_note, user_privilege_status, FK_user_id, FK_privilege_id) VALUES ?`
 const initialUserPrivilegeSQL = `INSERT INTO user_privilege (user_privilege_id, user_privilege_create_id, user_privilege_create_date, user_privilege_create_ip, user_privilege_update_id, user_privilege_update_date, user_privilege_update_ip, user_privilege_note, user_privilege_status, FK_user_id, FK_privilege_id) VALUES 
-('UP310722001', 'UPC31072201', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220001', 'PR310722001'),
-('UP310722002', 'UPC31072202', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220001', 'PR310722002'),
-('UP310722003', 'UPC31072203', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220001', 'PR310722003'),
-('UP310722004', 'UPC31072204', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220001', 'PR310722004'),
-('UP310722005', 'UPC31072205', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220001', 'PR310722005'),
-('UP310722006', 'UPC31072206', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220001', 'PR310722006'),
-('UP310722007', 'UPC31072207', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220001', 'PR310722007'),
-('UP310722008', 'UPC31072208', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220001', 'PR310722008')`
+('UP310722001', 'UPC310722001', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220001', 'PR310722001'),
+('UP310722002', 'UPC310722002', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722002'),
+('UP310722003', 'UPC310722003', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722003'),
+('UP310722004', 'UPC310722004', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722004'),
+('UP310722005', 'UPC310722005', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722005'),
+('UP310722006', 'UPC310722006', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722006'),
+('UP310722007', 'UPC310722007', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722007'),
+('UP310722008', 'UPC310722008', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722008'),
+('UP310722009', 'UPC310722009', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722009')`
 
 export const dropTables = {
   dropCustomerTableSQL,
