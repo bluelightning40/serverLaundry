@@ -1,7 +1,11 @@
+const dayjs = require('dayjs')
+const db = require('../db')
+
 require('dotenv').config()
 
 /**
- * Check for inputs inside req.body
+ * Check for inputs inside req.body.
+ *
  * This function fails if one of the inputs is missing or null
  * @param {Array} inputs - List of inputs to check
  * @param {Object} body - req.body
@@ -34,6 +38,49 @@ function inputChecks(
   return true
 }
 
+/**
+ * Generate id, createId, and updateId
+ * @param {String} tableName - Name of the table
+ * @param {String} prefixId - String at the start of the id
+ * @returns {String} id, createId, and updateId
+ */
+
+async function userNumberGenerator(tableName, prefixId) {
+  let dateString = dayjs().format('DDMMYY')
+  // Calculating User number
+  const connection = await db
+  let query = `SELECT * FROM ${tableName} WHERE customer_id like '${prefixId}${dateString}%'`
+  const [rows] = await connection.query(query)
+
+  // Creating IDs
+  const userNumber = `${dateString}${`${rows.length + 1}`.padStart(4, '0')}`
+  return {
+    id: `${prefixId}${userNumber}`,
+    createId: `${prefixId}C${userNumber}`,
+    updateId: `${prefixId}U${userNumber}`,
+  }
+}
+
+/**
+ * Helper to throw error.
+ *
+ * Error thrown will get caught by the express error handler
+ *
+ * Example:
+ *
+ *     throwError(404, 'user not found');
+ *
+ * @param {Number} statusCode - HTTP response status code, refer to https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+ * @param {String} message - Error message
+ *
+ */
+
+function throwError(statusCode, message) {
+  throw { status: statusCode, customMessage: message }
+}
+
 module.exports = {
   inputChecks,
+  userNumberGenerator,
+  throwError,
 }

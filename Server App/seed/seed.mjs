@@ -37,21 +37,21 @@ const loadAndSaveData = async () => {
 }
 
 const seedUsers = async () => {
-  let initialUserSQL = `INSERT INTO user (user_id, user_name, user_password, user_create_id, user_create_date, user_create_ip, user_update_id, user_update_date, user_update_ip, user_note, user_status) VALUES `
+  let initialUserSQL = `INSERT INTO user (user_id, user_name, user_username, user_password, user_create_id, user_create_date, user_create_ip, user_update_id, user_update_date, user_update_ip, user_note, user_status) VALUES `
   const users = [
-    { username: 'admin', password: 'admin' },
-    { username: 'user1', password: 'user1' },
-    { username: 'user2', password: 'user2' },
-    { username: 'user3', password: 'user3' },
+    { name: 'Admin', username: 'admin', password: 'admin' },
+    { name: 'User 1', username: 'user1', password: 'user1' },
+    { name: 'User 2', username: 'user2', password: 'user2' },
+    { name: 'User 3', username: 'user3', password: 'user3' },
   ]
   for (let i = 0; i < users.length; i++) {
     const user = users[i]
     try {
       const hash = await bcrypt.hash(user.password, 10)
       const userNumber = (i + 1).toString()
-      initialUserSQL += `('U120922${userNumber.padStart(4, '0')}','${
-        user.username
-      }', '${hash}', 'U120922${userNumber.padStart(
+      initialUserSQL += `('U120922${userNumber.padStart(4, '0')}', '${
+        user.name
+      }','${user.username}', '${hash}', 'U120922${userNumber.padStart(
         3,
         '0'
       )}', '2022-09-12', '::1', NULL, '2022-09-12', NULL, 'dummy data', 1),`

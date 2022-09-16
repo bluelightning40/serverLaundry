@@ -1,8 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const db = require('../db')
-const dayjs = require('dayjs')
-const { inputChecks } = require('../helper')
+const { inputChecks, userNumberGenerator } = require('../helper')
 
 const insertCustomerSQL = `INSERT INTO customer 
 (customer_id, customer_name, customer_phone_number, customer_email, 
@@ -12,17 +11,17 @@ const insertCustomerSQL = `INSERT INTO customer
 `
 
 router.get('/', async (req, res, next) => {
-  let statusCode = 200
-  let retVal = {}
+  const retVal = {
+    status: 200,
+  }
 
   try {
     const connection = await db
     const query = `SELECT * FROM customer`
     const [rows] = await connection.query(query)
 
-    retVal.status = statusCode
     retVal.data = rows
-    return res.status(statusCode).json(retVal)
+    return res.status(retVal.status).json(retVal)
   } catch (error) {
     return next(error)
   }
@@ -83,39 +82,44 @@ router.post('/add', async (req, res, next) => {
   //   conn.release();
   // })
 
-  let statusCode = 201
-  let retVal = {}
+  const retVal = {
+    status: 200,
+  }
   const requiredInputs = ['name', 'phone_number', 'email', 'address', 'status']
 
   try {
     inputChecks(requiredInputs, req.body)
 
-    const { name, phone_number, email, address, notes, status } = req.body // Input
+    // let dateString = dayjs().format('DDMMYY')
+
+    // // Calculating User number
+    // let query = `SELECT * FROM customer WHERE customer_id like 'C${dateString}%'`
+    // const [customers] = await connection.query(query)
+    // // Creating IDs
+    // const id = `C${dateString}${`${customers.length + 1}`.padStart(4, '0')}`
+    // const create_id = `CC${dateString}${`${customers.length + 1}`.padStart(
+    //   3,
+    //   '0'
+    // )}`
+    const { name, phone_number, email, address, notes, status } = req.body
     const create_ip = req.socket.localAddress
-    let dateString = dayjs().format('DDMMYY')
 
-    // Calculating User number
-    const connection = await db
-    let query = `SELECT * FROM customer WHERE customer_id like 'C${dateString}%'`
-    const [customers] = await connection.query(query)
-
-    // Creating IDs
-    const id = `C${dateString}${`${customers.length + 1}`.padStart(4, '0')}`
-    const create_id = `CC${dateString}${`${customers.length + 1}`.padStart(
-      3,
-      '0'
-    )}`
+    const { id, createId, updateId } = await userNumberGenerator(
+      'customer',
+      'C'
+    )
 
     // Inserting
+    const connection = await db
     await connection.query(insertCustomerSQL, [
       id,
       name,
       phone_number,
       email,
       address,
-      create_id,
+      createId,
       create_ip,
-      create_id,
+      updateId,
       create_ip,
       notes ? notes : null,
       status,
@@ -126,19 +130,18 @@ router.post('/add', async (req, res, next) => {
       `select * from customer where customer_id='${id}'`
     )
 
-    retVal.status = statusCode
     retVal.data = {
       id,
       name,
       phone_number,
       email,
       address,
-      create_id,
+      createId,
       create_date: createdCustomer[0].customer_create_date,
       create_ip,
     }
 
-    return res.status(statusCode).json(retVal)
+    return res.status(retVal.status).json(retVal)
   } catch (error) {
     return next(error)
   }
