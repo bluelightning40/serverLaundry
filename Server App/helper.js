@@ -50,7 +50,7 @@ function inputChecks(
 
 async function userNumberGenerator(connection, tableName, prefixId) {
   let dateString = dayjs().format('DDMMYY')
-  let query = `SELECT * FROM ${tableName} WHERE customer_id like '${prefixId}${dateString}%'`
+  let query = `SELECT * FROM ${tableName} WHERE ${tableName}_id like '${prefixId}${dateString}%'`
   const [rows] = await connection.query(query)
 
   // Creating IDs
