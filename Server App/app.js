@@ -23,8 +23,8 @@ app.use(cors())
 const customerRouter = require('./routes/customer')
 app.use('/api/customer', customerRouter)
 
-const userRouter = require('./routes/user')
-app.use('/api/user', userRouter)
+const employeeRouter = require('./routes/employee')
+app.use('/api/employee', employeeRouter)
 
 // let date_ob = new Date();
 

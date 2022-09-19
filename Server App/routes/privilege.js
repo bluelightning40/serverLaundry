@@ -2,14 +2,16 @@ const express = require('express')
 const router = express.Router()
 const db = require('../db')
 
-router.get('/', async (req, res, next) => {
+router.get('/get/:id?', async (req, res, next) => {
   let retVal = {
     status: 200,
   }
 
   try {
     const connection = await db
-    const query = `SELECT * FROM privilege`
+    const query = `SELECT * FROM privilege ${
+      req.params.id ? `where privilege_id = '${req.params.id}'` : ''
+    }`
     const [rows] = await connection.query(query)
 
     retVal.data = rows
@@ -18,7 +20,5 @@ router.get('/', async (req, res, next) => {
     next(err)
   }
 })
-
-// addUserPrivilege (privilege id nya array )
 
 module.exports = router

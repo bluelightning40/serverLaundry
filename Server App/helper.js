@@ -54,7 +54,10 @@ async function userNumberGenerator(connection, tableName, prefixId) {
   const [rows] = await connection.query(query)
 
   // Creating IDs
-  const userNumber = `${dateString}${`${rows.length + 1}`.padStart(4, '0')}`
+  const userNumber = `${dateString}${`${rows.length + 1}`.padStart(
+    4 - prefixId.length + 1,
+    '0'
+  )}`
   return {
     id: `${prefixId}${userNumber}`,
     createId: `${prefixId}C${userNumber}`,

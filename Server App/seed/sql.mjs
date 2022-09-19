@@ -36,11 +36,11 @@ const createDTransTableSQL = `CREATE TABLE d_trans (
   d_trans_subtotal BIGINT(20) NOT NULL,
   d_trans_status BOOLEAN NOT NULL,
   FK_h_product_id VARCHAR(11) NOT NULL,
-  FK_user_id VARCHAR(11) DEFAULT NULL,
+  FK_employee_id VARCHAR(11) DEFAULT NULL,
   FK_h_trans_id VARCHAR(11) NOT NULL
 )`
-const insertDTransSQL = `INSERT INTO d_trans (d_trans_id, d_trans_create_id, d_trans_create_date, d_trans_create_ip, d_trans_update_id, d_trans_update_date, d_trans_update_ip, d_trans_note, d_trans_done, d_trans_quantity, d_trans_subtotal, d_trans_status, FK_h_product_id, FK_user_id, FK_h_trans_id) VALUES ?`
-const initialDTransSQL = `INSERT INTO d_trans (d_trans_id, d_trans_create_id, d_trans_create_date, d_trans_create_ip, d_trans_update_id, d_trans_update_date, d_trans_update_ip, d_trans_note, d_trans_done, d_trans_quantity, d_trans_subtotal, d_trans_status, FK_h_product_id, FK_user_id, FK_h_trans_id) VALUES 
+const insertDTransSQL = `INSERT INTO d_trans (d_trans_id, d_trans_create_id, d_trans_create_date, d_trans_create_ip, d_trans_update_id, d_trans_update_date, d_trans_update_ip, d_trans_note, d_trans_done, d_trans_quantity, d_trans_subtotal, d_trans_status, FK_h_product_id, FK_employee_id, FK_h_trans_id) VALUES ?`
+const initialDTransSQL = `INSERT INTO d_trans (d_trans_id, d_trans_create_id, d_trans_create_date, d_trans_create_ip, d_trans_update_id, d_trans_update_date, d_trans_update_ip, d_trans_note, d_trans_done, d_trans_quantity, d_trans_subtotal, d_trans_status, FK_h_product_id, FK_employee_id, FK_h_trans_id) VALUES 
 ('DT100922001', 'DTC100922001', '2022-09-10', '::1', NULL, '2022-09-10', NULL, 'data dummy', 0, 1, 15000, 1, 'HP310722001', NULL, 'T1009220001'),
 ('DT310722001', 'DTC310722001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 0, 1, 15000, 1, 'HP310722001', NULL, 'T3107220001'),
 ('DT310722002', 'DTC310722002', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 0, 1, 15000, 1, 'HP310722002', NULL, 'T3107220001')`
@@ -184,69 +184,69 @@ const initialProductSQL = `INSERT INTO product (product_id, product_name, produc
 ('P3107220001', 'Wax', 'produk', 25000, 'kiwi', 50, 'habis pakai', 'PC310722001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1),
 ('P3107220002', 'Deep Wash', 'jasa', 75000, NULL, 10, 'washing', 'PC310722002', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1)`
 
-// User
-const dropUserTableSQL = 'DROP TABLE IF EXISTS user'
-const createUserTableSQL = `CREATE TABLE user (
-  user_id VARCHAR(11) NOT NULL,
-  PRIMARY KEY (user_id),
-  user_name VARCHAR(255) NOT NULL,
-  user_username VARCHAR(255) NOT NULL,
-  user_password VARCHAR(255) NOT NULL,
-  user_create_id VARCHAR(12) NOT NULL,
-  user_create_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-  user_create_ip VARCHAR(15) NOT NULL,
-  user_update_id VARCHAR(12) DEFAULT NULL,
-  user_update_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-  user_update_ip VARCHAR(15) DEFAULT NULL,
-  user_note TEXT DEFAULT NULL,
-  user_status BOOLEAN NOT NULL
+// Employee
+const dropEmployeeTableSQL = 'DROP TABLE IF EXISTS employee'
+const createEmployeeTableSQL = `CREATE TABLE employee (
+  employee_id VARCHAR(11) NOT NULL,
+  PRIMARY KEY (employee_id),
+  employee_name VARCHAR(255) NOT NULL,
+  employee_username VARCHAR(255) NOT NULL,
+  employee_password VARCHAR(255) NOT NULL,
+  employee_create_id VARCHAR(12) NOT NULL,
+  employee_create_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  employee_create_ip VARCHAR(15) NOT NULL,
+  employee_update_id VARCHAR(12) DEFAULT NULL,
+  employee_update_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  employee_update_ip VARCHAR(15) DEFAULT NULL,
+  employee_note TEXT DEFAULT NULL,
+  employee_status BOOLEAN NOT NULL
 )`
 
-// User Login
-const dropUserLoginTableSQL = 'DROP TABLE IF EXISTS user_login'
-const createUserLoginTableSQL = `CREATE TABLE user_login (
-  user_login_id VARCHAR(11) NOT NULL,
-  PRIMARY KEY (user_login_id),
-  FK_user_id VARCHAR(11) NOT NULL,
-  user_login_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-  user_login_ip VARCHAR(15) NOT NULL,
-  user_login_status BOOLEAN NOT NULL,
-  user_login_create_id VARCHAR(12) NOT NULL,
-  user_login_create_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-  user_login_update_id VARCHAR(12) DEFAULT NULL,
-  user_login_update_date DATETIME DEFAULT CURRENT_TIMESTAMP
+// Employee Login
+const dropEmployeeLoginTableSQL = 'DROP TABLE IF EXISTS employee_login'
+const createEmployeeLoginTableSQL = `CREATE TABLE employee_login (
+  employee_login_id VARCHAR(11) NOT NULL,
+  PRIMARY KEY (employee_login_id),
+  FK_employee_id VARCHAR(11) NOT NULL,
+  employee_login_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  employee_login_ip VARCHAR(15) NOT NULL,
+  employee_login_status BOOLEAN NOT NULL,
+  employee_login_create_id VARCHAR(12) NOT NULL,
+  employee_login_create_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  employee_login_update_id VARCHAR(12) DEFAULT NULL,
+  employee_login_update_date DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
-const insertUserLoginSQL = `INSERT INTO user_login(user_login_id, FK_user_id, user_login_date, user_login_ip, user_login_status, user_login_create_id, user_login_create_date, user_login_update_id, user_login_update_date) VALUES ?`
-const initialUserLoginSQL = `INSERT INTO user_login(user_login_id, FK_user_id, user_login_date, user_login_ip, user_login_status, user_login_create_id, user_login_create_date, user_login_update_id, user_login_update_date) VALUES 
-('L1209220001', 'U1209220001', '2022-09-12', '::1', 0, 'LC120922001', '2022-09-12', 'LU120922001', '2022-09-12'),
-('L1209220002', 'U1209220001', '2022-09-12', '::1', 0, 'LC120922002', '2022-09-12', 'LU120922001', '2022-09-12')`
+const insertEmployeeLoginSQL = `INSERT INTO employee_login(employee_login_id, FK_employee_id, employee_login_date, employee_login_ip, employee_login_status, employee_login_create_id, employee_login_create_date, employee_login_update_id, employee_login_update_date) VALUES ?`
+const initialEmployeeLoginSQL = `INSERT INTO employee_login(employee_login_id, FK_employee_id, employee_login_date, employee_login_ip, employee_login_status, employee_login_create_id, employee_login_create_date, employee_login_update_id, employee_login_update_date) VALUES 
+('L1209220001', 'E1209220001', '2022-09-12', '::1', 0, 'LC120922001', '2022-09-12', 'LU120922001', '2022-09-12'),
+('L1209220002', 'E1209220001', '2022-09-12', '::1', 0, 'LC120922002', '2022-09-12', 'LU120922001', '2022-09-12')`
 
-// User Privilege
-const dropUserPrivilegeTableSQL = 'DROP TABLE IF EXISTS user_privilege'
-const createUserPrivilegeTableSQL = `CREATE TABLE user_privilege (
-  user_privilege_id VARCHAR(11) NOT NULL,
-  PRIMARY KEY (user_privilege_id),
-  user_privilege_create_id VARCHAR(12) NOT NULL,
-  user_privilege_create_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-  user_privilege_create_ip VARCHAR(15) NOT NULL,
-  user_privilege_update_id VARCHAR(12) DEFAULT NULL,
-  user_privilege_update_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-  user_privilege_update_ip VARCHAR(15) DEFAULT NULL,
-  user_privilege_note TEXT DEFAULT NULL,
-  user_privilege_status BOOLEAN NOT NULL,
-  FK_user_id VARCHAR(11) NOT NULL,
+// Employee Privilege
+const dropEmployeePrivilegeTableSQL = 'DROP TABLE IF EXISTS employee_privilege'
+const createEmployeePrivilegeTableSQL = `CREATE TABLE employee_privilege (
+  employee_privilege_id VARCHAR(11) NOT NULL,
+  PRIMARY KEY (employee_privilege_id),
+  employee_privilege_create_id VARCHAR(12) NOT NULL,
+  employee_privilege_create_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  employee_privilege_create_ip VARCHAR(15) NOT NULL,
+  employee_privilege_update_id VARCHAR(12) DEFAULT NULL,
+  employee_privilege_update_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  employee_privilege_update_ip VARCHAR(15) DEFAULT NULL,
+  employee_privilege_note TEXT DEFAULT NULL,
+  employee_privilege_status BOOLEAN NOT NULL,
+  FK_employee_id VARCHAR(11) NOT NULL,
   FK_privilege_id VARCHAR(11) NOT NULL
 )`
-const initialUserPrivilegeSQL = `INSERT INTO user_privilege (user_privilege_id, user_privilege_create_id, user_privilege_create_date, user_privilege_create_ip, user_privilege_update_id, user_privilege_update_date, user_privilege_update_ip, user_privilege_note, user_privilege_status, FK_user_id, FK_privilege_id) VALUES 
-('UP310722001', 'UPC310722001', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220001', 'PR310722001'),
-('UP310722002', 'UPC310722002', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722002'),
-('UP310722003', 'UPC310722003', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722003'),
-('UP310722004', 'UPC310722004', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722004'),
-('UP310722005', 'UPC310722005', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722005'),
-('UP310722006', 'UPC310722006', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722006'),
-('UP310722007', 'UPC310722007', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722007'),
-('UP310722008', 'UPC310722008', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722008'),
-('UP310722009', 'UPC310722009', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722009')`
+const initialEmployeePrivilegeSQL = `INSERT INTO employee_privilege (employee_privilege_id, employee_privilege_create_id, employee_privilege_create_date, employee_privilege_create_ip, employee_privilege_update_id, employee_privilege_update_date, employee_privilege_update_ip, employee_privilege_note, employee_privilege_status, FK_employee_id, FK_privilege_id) VALUES 
+('EP310722001', 'EPC310722001', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220001', 'PR310722001'),
+('EP310722002', 'EPC310722002', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722002'),
+('EP310722003', 'EPC310722003', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722003'),
+('EP310722004', 'EPC310722004', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722004'),
+('EP310722005', 'EPC310722005', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722005'),
+('EP310722006', 'EPC310722006', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722006'),
+('EP310722007', 'EPC310722007', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722007'),
+('EP310722008', 'EPC310722008', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722008'),
+('EP310722009', 'EPC310722009', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722009')`
 
 export const dropTables = {
   dropCustomerTableSQL,
@@ -256,9 +256,9 @@ export const dropTables = {
   dropPromoTableSQL,
   dropPrivilegeTableSQL,
   dropProductTableSQL,
-  dropUserLoginTableSQL,
-  dropUserPrivilegeTableSQL,
-  dropUserTableSQL,
+  dropEmployeeLoginTableSQL,
+  dropEmployeePrivilegeTableSQL,
+  dropEmployeeTableSQL,
 }
 
 export const createTables = {
@@ -268,9 +268,9 @@ export const createTables = {
   createHTransTableSQL,
   createPrivilegeTableSQL,
   createProductTableSQL,
-  createUserLoginTableSQL,
-  createUserPrivilegeTableSQL,
-  createUserTableSQL,
+  createEmployeeLoginTableSQL,
+  createEmployeePrivilegeTableSQL,
+  createEmployeeTableSQL,
   createPromoTableSQL,
 }
 
@@ -279,7 +279,7 @@ export const insertSQL = {
   insertHProductSQL,
   insertHTransSQL,
   insertProductSQL,
-  insertUserLoginSQL,
+  insertEmployeeLoginSQL,
 }
 
 export const initialRecords = {
@@ -290,6 +290,6 @@ export const initialRecords = {
   initialPrivilegeSQL,
   initialProductSQL,
   initialPromoSQL,
-  initialUserLoginSQL,
-  initialUserPrivilegeSQL,
+  initialEmployeeLoginSQL,
+  initialEmployeePrivilegeSQL,
 }

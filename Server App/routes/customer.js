@@ -10,14 +10,18 @@ const insertCustomerSQL = `INSERT INTO customer
   customer_status) VALUES (?,?,?,?,?,?,?,?,?,?,?)
 `
 
-router.get('/', async (req, res, next) => {
+const updateCustomerSQL = `UPDATE customer SET customer_name=?, customer_phone_number=?, customer_email=?, customer_address=?, customer_update_ip=?, customer_update_date=?, customer_note=?,customer_status=? WHERE customer_id=?`
+
+router.get('/get/:id?', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
 
   try {
     const connection = await db
-    const query = `SELECT * FROM customer`
+    const query = `SELECT * FROM customer ${
+      req.params.id ? `where customer_id = '${req.params.id}'` : ''
+    }`
     const [rows] = await connection.query(query)
 
     retVal.data = rows
@@ -27,16 +31,7 @@ router.get('/', async (req, res, next) => {
   }
 })
 
-// router.get('/test', async (req, res) => {
-//   let id = `C${dayjs().format('DDMMYY')}`
-//   const connection = await db
-//   const query = `SELECT * FROM customer WHERE customer_id like '${id}%'`
-//   const [rows] = await connection.query(query)
-//   const userNumber = `${rows.length + 1}`.padStart(4, '0')
-//   return res.status(200).send(`${id}${userNumber}`)
-// })
-
-router.post('/add', async (req, res, next) => {
+router.post('/create', async (req, res, next) => {
   // var date = date_ob.getDate();
   // var month = date_ob.getMonth()+1;
   // var year = date_ob.getYear() % 100;
@@ -140,6 +135,58 @@ router.post('/add', async (req, res, next) => {
       createId,
       create_date: createdCustomer[0].customer_create_date,
       create_ip,
+      notes: notes ? notes : null,
+      status: status,
+    }
+
+    return res.status(retVal.status).json(retVal)
+  } catch (error) {
+    return next(error)
+  }
+})
+
+router.post('/update/:id', async (req, res, next) => {
+  const retVal = {
+    status: 200,
+  }
+  const requiredInputs = ['name', 'phone_number', 'email', 'address', 'status']
+
+  try {
+    inputChecks(requiredInputs, req.body)
+
+    const { name, phone_number, email, address, notes, status } = req.body
+    const ip = req.socket.localAddress
+
+    const connection = await db
+
+    const [oldCustomer] = await connection.query(
+      `SELECT * FROM customer WHERE customer_id=?`,
+      req.params.id
+    )
+
+    // updating
+    await connection.query(updateCustomerSQL, [
+      name,
+      phone_number,
+      email,
+      address,
+      ip,
+      new Date(),
+      notes ? notes : oldCustomer.customer_note,
+      status,
+      req.params.id,
+    ])
+
+    retVal.data = {
+      id: req.params.id,
+      name,
+      phone_number,
+      email,
+      address,
+      ip,
+      updated_date: new Date(),
+      notes: notes ? notes : oldCustomer.customer_note,
+      status: status,
     }
 
     return res.status(retVal.status).json(retVal)
