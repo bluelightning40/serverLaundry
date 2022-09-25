@@ -26,6 +26,18 @@ app.use('/api/customer', customerRouter)
 const employeeRouter = require('./routes/employee')
 app.use('/api/employee', employeeRouter)
 
+const privilegeRouter = require('./routes/privilege')
+app.use('/api/privilege', privilegeRouter)
+
+const productRouter = require('./routes/product')
+app.use('/api/product', productRouter)
+
+const transactionRouter = require('./routes/transaction')
+app.use('/api/transaction', transactionRouter)
+
+const promoRouter = require('./routes/promo')
+app.use('/api/promo', promoRouter)
+
 // let date_ob = new Date();
 
 // import customerRouter fro./routes/customer.js.js'

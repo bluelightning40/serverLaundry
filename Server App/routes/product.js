@@ -29,7 +29,7 @@ router.get('/getProduct/:id?', async (req, res, next) => {
   }
 
   try{
-    const connection await db
+    const connection = await db
     const query = `SELECT * FROM product ${
       req.params.id ? `where product_id = '${req.params.id}'` : ''
     }`
@@ -49,7 +49,7 @@ router.get('/getHProduct/:id?', async (req, res, next) => {
   }
 
   try{
-    const connection await db
+    const connection = await db
     const query = `SELECT * FROM h_product ${
       req.params.id ? `where FK_product_id = '${req.params.id}'` : ''
     }`
