@@ -135,8 +135,8 @@ router.post('/create', async (req, res, next) => {
       category,
       createId,
       create_date: createdProduct[0].product_create_date,
-      creaet_ip,
-      notes: notes? notes : null,
+      create_ip,
+      note: note? note : null,
       status: status,
     }
 
@@ -192,6 +192,7 @@ router.post('/update/:id', async (req,res, next) => {
       new Date(),
       notes ? notes : oldProduct.product_note,
       status,
+      req.params.id,
     ])
 
     retVal.data = {
