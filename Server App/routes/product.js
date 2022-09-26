@@ -65,7 +65,7 @@ router.get('/getHProduct/:id?', async (req, res, next) => {
 
 router.post('/create', async (req, res, next) => {
   const retVal = {
-    status: 200,
+    status: 201,
   }
   const requiredInputs = ['name','type','price','stock','category', 'status']
 
@@ -173,7 +173,7 @@ router.post('/update/:id', async (req,res, next) => {
       'P'
     )
 
-    const {h_id, h_createId, h_updateId} = await userNumberGenerator(
+    const {id:h_id, createId:h_createId, updateId:h_updateId} = await userNumberGenerator(
       connection,
       'h_product',
       'HP'
@@ -181,17 +181,17 @@ router.post('/update/:id', async (req,res, next) => {
 
     //updating data
     await connection.query(updateProductSQL, [
-      name,
-      type,
-      price,
-      brand,
-      stock,
-      category,
+      name: name?name:oldProduct[0].product_name,
+      type: type?type:oldProduct[0].product_type,
+      price: price?price:oldProduct[0].product_price,
+      brand: brand?brand:oldProduct[0].product_brand,
+      stock: stock?stock:oldProduct[0].product_stock,
+      category: category?category:oldProduct[0].product_category,
       updateId,
       ip,
       new Date(),
-      notes ? notes : oldProduct.product_note,
-      status,
+      notes: notes ? notes : oldProduct.product_note,
+      status: status?status:oldProduct[0].product_status,
       req.params.id,
     ])
 
