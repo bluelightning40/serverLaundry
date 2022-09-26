@@ -5,11 +5,15 @@ const db = require('../db')
 const { inputChecks, userNumberGenerator } = require('../helper')
 
 const insertHTransactionSQL = `INSERT INTO h_trans
-(h_trans_id, h_trans_total, h_trans_create_id, h_trans_create_ip,
-  h_trans_update_id, h_trans_update_ip, h_trans_note,
-  h_trans_status, FK_customer_id)
+(h_trans_id, h_trans_main_photo, h_trans_main_note,
+  h_trans_top_photo, h_trans_top_note, h_trans_left_photo,
+  h_trans_left_note, h_trans_right_photo, h_trans_right_note,
+  h_trans_below_photo, h_trans_below_note, h_trans_total,
+  h_trans_create_id, h_trans_create_date, h_trans_create_ip,
+  h_trans_update_id, h_trans_update_date, h_trans_update_ip,
+  h_trans_note, h_trans_status, FK_customer_id)
   VALUES
-  (?,?,?,?,?,?,?,?,?)
+  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 `
 
 const insertDTransactionSQL = `INSERT INTO d_trans
@@ -82,13 +86,25 @@ router.post('/createHTrans', async (req,res,next) => {
   const retVal = {
     status: 200,
   }
-  const requiredInputs = ['total','status','customer_id']
+  const requiredInputs = ['total','status','customer_id','images','imageNotes']
 
   try{
     inputChecks(requiredInputs, req.body)
 
     const {total, note, status, customer_id} = req.body
     const create_ip = req.socket.localAddress
+
+    const uploadedImages = []
+
+    for(var i=0;i<5;i++){
+      const fileStr = req.body.images[i];
+
+      const uploadResponse = await cloudinary.uploader.upload(fileStr,{
+        upload_preset: 'dummy_value'
+      })
+
+      uploadedImages.push(uploadResponse.url)
+    }
 
     const connection = await db
 
@@ -100,6 +116,16 @@ router.post('/createHTrans', async (req,res,next) => {
 
     await connection.query(insertHTransactionSQL, [
       id,
+      uploadedImages[0],
+      imageNotes[0],
+      uploadedImages[1],
+      imageNotes[1],
+      uploadedImages[2],
+      imageNotes[2],
+      uploadedImages[3],
+      imageNotes[3],
+      uploadedImages[4],
+      imageNotes[4],
       total,
       createId,
       create_ip,
