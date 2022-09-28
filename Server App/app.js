@@ -3,14 +3,7 @@ const express = require('express')
 // const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const { inputChecks } = require('./helper')
 require('dotenv').config()
-// PLANETSCALE CONNECT
-// const mysql = require('mysql2')
-// import mysql from 'mysql2/promise'
-// const connection = await mysql.createConnection(process.env.DATABASE_URL)
-// console.log('Connected to PlanetScale!')
-// [END] PLANETSCALE CONNECT
 
 const app = express()
 
@@ -44,14 +37,10 @@ app.use('/api/transaction/detail', dtransRouter)
 app.get('/api/test', (req, res) => {
   // const name = 'yosua'
   //   name += 'hellooo'
-  return res
-    .status(200)
-    .send(inputChecks(['username', 'password'], req.body, true))
+  return res.status(200).json('Welcome')
 })
 
-app.listen(3000, () =>
-  console.log(`API SERVER IS RUNNING...  Listening to Port 3000!`)
-)
+app.listen(3000, () => console.log(`Running...`))
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {

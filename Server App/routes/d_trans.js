@@ -20,12 +20,12 @@ const updateDTransactionSQL = `UPDATE d_trans SET
   d_trans_id=?
 `
 
-router.get('/getDTrans/:id?', async (req,res,next) => {
+router.get('/getDTrans/:id?', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
 
-  try{
+  try {
     const connection = await db
 
     const query = `SELECT * FROM d_trans ${
@@ -41,21 +41,29 @@ router.get('/getDTrans/:id?', async (req,res,next) => {
   }
 })
 
-router.post('/createDTrans', async (req,res,next) => {
+router.post('/createDTrans', async (req, res, next) => {
   const retVal = {
     status: 201,
   }
-  const requiredInputs = ['done', 'quantity', 'subtotal', 'status', 'FK_h_product_id', 'FK_h_trans_id']
+  const requiredInputs = [
+    'done',
+    'quantity',
+    'subtotal',
+    'status',
+    'FK_h_product_id',
+    'FK_h_trans_id',
+  ]
 
-  try{
+  try {
     inputChecks(requiredInputs, req.body)
 
-    const {note, done, quantity, subtotal, status, h_product_id, h_trans_id} = req.body
+    const { note, done, quantity, subtotal, status, h_product_id, h_trans_id } =
+      req.body
     const create_ip = req.socket.localAddress
 
     const connection = await db
 
-    const {id,createId, updateId} = await userNumberGenerator(
+    const { id, createId, updateId } = await userNumberGenerator(
       connection,
       'd_trans',
       'DT'
@@ -72,7 +80,7 @@ router.post('/createDTrans', async (req,res,next) => {
       subtotal,
       status,
       h_product_id,
-      h_trans_id
+      h_trans_id,
     ])
 
     const [createdDtrans] = await connection.query(
@@ -86,28 +94,28 @@ router.post('/createDTrans', async (req,res,next) => {
       create_ip,
       updateId,
       update_date: createdDtrans[0].d_trans_update_date,
-      create_ip,
-      note: note? note:null,
+      update_ip: create_ip,
+      note: note ? note : null,
       done,
       quantity,
       subtotal,
-      status : status,
+      status: status,
       h_product_id,
       employee_id: createdDtrans[0].FK_employee_id,
-      h_trans_id
+      h_trans_id,
     }
   } catch (error) {
     return next(error)
   }
 })
 
-router.post('/updateDTrans/:id?', async (req,res,next) => {
+router.post('/updateDTrans/:id?', async (req, res, next) => {
   const retVal = {
-    status:200
+    status: 200,
   }
 
-  try{
-    const {note, done, quantity, subtotal, status, employee_id} = req.body
+  try {
+    const { note, done, quantity, subtotal, status, employee_id } = req.body
     const ip = req.socket.localAddress
 
     const connection = await db
@@ -117,7 +125,7 @@ router.post('/updateDTrans/:id?', async (req,res,next) => {
       req.params.id
     )
 
-    const {id, createId, updateId} = await userNumberGenerator(
+    const { id, createId, updateId } = await userNumberGenerator(
       connection,
       'd_trans',
       'DT'
@@ -127,13 +135,13 @@ router.post('/updateDTrans/:id?', async (req,res,next) => {
       updateId,
       new Date(),
       ip,
-      note ? note: oldDTrans.d_trans_note,
-      done ? done: oldDTrans.d_trans_done,
-      quantity ? quantity: oldDTrans.d_trans_quantity,
-      subtotal ? subtotal: oldDTrans.d_trans_subtotal,
-      status ? status: oldDTrans.d_trans_status,
-      employee_id ? employee_id: oldDTrans.FK_employee_id,
-      req.params.id
+      note ? note : oldDTrans.d_trans_note,
+      done ? done : oldDTrans.d_trans_done,
+      quantity ? quantity : oldDTrans.d_trans_quantity,
+      subtotal ? subtotal : oldDTrans.d_trans_subtotal,
+      status ? status : oldDTrans.d_trans_status,
+      employee_id ? employee_id : oldDTrans.FK_employee_id,
+      req.params.id,
     ])
 
     retVal.data = {
@@ -141,14 +149,14 @@ router.post('/updateDTrans/:id?', async (req,res,next) => {
       updateId,
       date: new Date(),
       ip,
-      note: note ? note: oldDTrans.d_trans_note,
-      done: done ? done: oldDTrans.d_trans_done,
-      quantity: quantity ? quantity: oldDTrans.d_trans_quantity,
-      subtotal: subtotal ? subtotal: oldDTrans.d_trans_subtotal,
-      status: status ? status: oldDTrans.d_trans_status,
+      note: note ? note : oldDTrans.d_trans_note,
+      done: done ? done : oldDTrans.d_trans_done,
+      quantity: quantity ? quantity : oldDTrans.d_trans_quantity,
+      subtotal: subtotal ? subtotal : oldDTrans.d_trans_subtotal,
+      status: status ? status : oldDTrans.d_trans_status,
       h_product_id: oldDTrans.FK_h_product_id,
-      employee_id: employee_id ? employee_id: oldDTrans.FK_employee_id,
-      h_trans_id: oldDTrans.FK_h_trans_id
+      employee_id: employee_id ? employee_id : oldDTrans.FK_employee_id,
+      h_trans_id: oldDTrans.FK_h_trans_id,
     }
 
     return res.status(retVal.status).json(retVal)

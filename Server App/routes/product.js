@@ -28,7 +28,7 @@ router.get('/getProduct/:id?', async (req, res, next) => {
     status: 200,
   }
 
-  try{
+  try {
     const connection = await db
     const query = `SELECT * FROM product ${
       req.params.id ? `where product_id = '${req.params.id}'` : ''
@@ -38,7 +38,7 @@ router.get('/getProduct/:id?', async (req, res, next) => {
 
     retVal.data = rows
     return res.status(retVal.status).json(retVal)
-  } catch (error){
+  } catch (error) {
     return next(error)
   }
 })
@@ -48,7 +48,7 @@ router.get('/getHProduct/:id?', async (req, res, next) => {
     status: 200,
   }
 
-  try{
+  try {
     const connection = await db
     const query = `SELECT * FROM h_product ${
       req.params.id ? `where FK_product_id = '${req.params.id}'` : ''
@@ -58,7 +58,7 @@ router.get('/getHProduct/:id?', async (req, res, next) => {
 
     retVal.data = rows
     return res.status(retVal.status).json(retVal)
-  } catch (error){
+  } catch (error) {
     return next(error)
   }
 })
@@ -67,24 +67,31 @@ router.post('/create', async (req, res, next) => {
   const retVal = {
     status: 201,
   }
-  const requiredInputs = ['name','type','price','stock','category', 'status']
+  const requiredInputs = [
+    'name',
+    'type',
+    'price',
+    'stock',
+    'category',
+    'status',
+  ]
 
-  try{
+  try {
     inputChecks(requiredInputs, req.body)
 
-    const {name, type, price, brand, stock, category, note, status} = req.body
+    const { name, type, price, brand, stock, category, note, status } = req.body
     const create_ip = req.socket.localAddress
 
     const connection = await db
 
     // Creating ID String
-    const {id, createId, updateId} = await userNumberGenerator(
+    const { id, createId, updateId } = await userNumberGenerator(
       connection,
       'product',
       'P'
     )
 
-    const {h_id, h_createId, h_updateId} = await userNumberGenerator(
+    const { h_id, h_createId, h_updateId } = await userNumberGenerator(
       connection,
       'h_product',
       'HP'
@@ -136,27 +143,34 @@ router.post('/create', async (req, res, next) => {
       createId,
       create_date: createdProduct[0].product_create_date,
       create_ip,
-      note: note? note : null,
+      note: note ? note : null,
       status: status,
     }
 
     return res.status(retVal.status).json(retVal)
-  } catch (error){
+  } catch (error) {
     return next(error)
   }
 })
 
-router.post('/update/:id', async (req,res, next) => {
+router.post('/update/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
 
-  const requiredInputs = ['name','type','price','stock','category', 'status']
+  const requiredInputs = [
+    'name',
+    'type',
+    'price',
+    'stock',
+    'category',
+    'status',
+  ]
 
-  try{
+  try {
     inputChecks(requiredInputs, req.body)
 
-    const {name, type, price, brand, stock, category, note, status} = req.body
+    const { name, type, price, brand, stock, category, note, status } = req.body
     const update_ip = req.socket.localAddress
 
     const connection = await db
@@ -167,31 +181,31 @@ router.post('/update/:id', async (req,res, next) => {
     )
 
     // Creating ID String
-    const {id, createId, updateId} = await userNumberGenerator(
+    const { id, updateId } = await userNumberGenerator(
       connection,
       'product',
       'P'
     )
 
-    const {id:h_id, createId:h_createId, updateId:h_updateId} = await userNumberGenerator(
-      connection,
-      'h_product',
-      'HP'
-    )
+    const {
+      id: h_id,
+      createId: h_createId,
+      updateId: h_updateId,
+    } = await userNumberGenerator(connection, 'h_product', 'HP')
 
     //updating data
     await connection.query(updateProductSQL, [
-      name?name:oldProduct[0].product_name,
-      type?type:oldProduct[0].product_type,
-      price?price:oldProduct[0].product_price,
-      brand?brand:oldProduct[0].product_brand,
-      stock?stock:oldProduct[0].product_stock,
-      category?category:oldProduct[0].product_category,
+      name ? name : oldProduct[0].product_name,
+      type ? type : oldProduct[0].product_type,
+      price ? price : oldProduct[0].product_price,
+      brand ? brand : oldProduct[0].product_brand,
+      stock ? stock : oldProduct[0].product_stock,
+      category ? category : oldProduct[0].product_category,
       updateId,
-      ip,
+      update_ip,
       new Date(),
-      notes ? notes : oldProduct.product_note,
-      status?status:oldProduct[0].product_status,
+      note ? note : oldProduct.product_note,
+      status ? status : oldProduct[0].product_status,
       req.params.id,
     ])
 
@@ -204,9 +218,9 @@ router.post('/update/:id', async (req,res, next) => {
       stock,
       category,
       updateId,
-      ip,
+      update_ip,
       updated_date: new Date(),
-      notes: notes? notes : oldProduct.product_note,
+      note: note ? note : oldProduct.product_note,
       status: status,
     }
 
@@ -215,16 +229,16 @@ router.post('/update/:id', async (req,res, next) => {
       h_id,
       price,
       h_createId,
-      create_ip,
+      update_ip,
       h_updateId,
-      create_ip,
+      update_ip,
       note,
       status,
       id,
     ])
 
     return res.status(retVal.status).json(retVal)
-  } catch(error) {
+  } catch (error) {
     return next(error)
   }
 })

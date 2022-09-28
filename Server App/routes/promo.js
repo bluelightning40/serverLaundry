@@ -22,12 +22,12 @@ const updatePromoSQL = `UPDATE promo SET
   promo_id=?
 `
 
-router.get('/get/:id?', async (req,res,next)=>{
+router.get('/get/:id?', async (req, res, next) => {
   const retVal = {
-    status: 200
+    status: 200,
   }
 
-  try{
+  try {
     const connection = await db
     const query = `SELECT * FROM promo ${
       req.params.id ? `WHERE promo_id = '${req.params.id}'` : ''
@@ -35,34 +35,44 @@ router.get('/get/:id?', async (req,res,next)=>{
 
     const [rows] = await connection.query(query)
 
-    retVal.data=rows
+    retVal.data = rows
 
     return res.status(retVal.status).json(retVal)
-
-  }catch (error){
+  } catch (error) {
     return next(error)
   }
 })
 
-router.post('/create', async (req,res,next) => {
+router.post('/create', async (req, res, next) => {
   const retVal = {
-    status: 201
+    status: 201,
   }
 
   const requiredInputs = ['name', 'description', 'value', 'max_date', 'status']
 
-  try{
+  try {
     inputChecks(requiredInputs, req.body)
 
-    const {name, description, value, is_percentage, min_total, max_discount, min_date, max_date, note, status} = req.body
+    const {
+      name,
+      description,
+      value,
+      is_percentage,
+      min_total,
+      max_discount,
+      min_date,
+      max_date,
+      note,
+      status,
+    } = req.body
     const ip = req.socket.localAddress
 
     const connection = await db
 
-    const {id, createId, updateId} = await userNumberGenerator(
+    const { id, createId, updateId } = await userNumberGenerator(
       connection,
       'promo',
-      'PR',
+      'PR'
     )
 
     await connection.query(insertPromoSQL, [
@@ -70,24 +80,24 @@ router.post('/create', async (req,res,next) => {
       name,
       description,
       value,
-      is_percentage ? is_percentage:null,
-      min_total ? min_total:null,
-      max_discount ? max_discount:null,
-      min_date ? min_date:null,
-      max_date ? max_date:null,
+      is_percentage ? is_percentage : null,
+      min_total ? min_total : null,
+      max_discount ? max_discount : null,
+      min_date ? min_date : null,
+      max_date ? max_date : null,
       createId,
       ip,
       updateId,
       ip,
-      note? note:null,
-      status
+      note ? note : null,
+      status,
     ])
 
     const [createdPromo] = await connection.query(
       `SELECT * FROM promo WHERE promo_id = '${id}'`
     )
 
-    retVal.data={
+    retVal.data = {
       id,
       name,
       description,
@@ -98,26 +108,37 @@ router.post('/create', async (req,res,next) => {
       min_date: createdPromo[0].promo_min_date,
       max_date: createdPromo[0].promo_max_date,
       createId,
-      ip,
+      create_ip: ip,
       updateId,
-      ip,
+      update_ip: ip,
       note: createdPromo[0].note,
-      status
+      status,
     }
 
     return res.status(retVal.status).json(retVal)
-  } catch (error){
-
+  } catch (error) {
+    return next(error)
   }
 })
 
-router.post('/update/:id?', async (req,res,next) => {
+router.post('/update/:id?', async (req, res, next) => {
   const retVal = {
-    status: 200
+    status: 200,
   }
 
-  try{
-    const {name, description, value, is_percentage, min_total, max_discount, min_date, max_date, note, status} = req.body
+  try {
+    const {
+      name,
+      description,
+      value,
+      is_percentage,
+      min_total,
+      max_discount,
+      min_date,
+      max_date,
+      note,
+      status,
+    } = req.body
     const ip = req.socket.localAddress
 
     const connection = await db
@@ -127,47 +148,49 @@ router.post('/update/:id?', async (req,res,next) => {
       req.params.id
     )
 
-    const {id, createId, updateId} = await userNumberGenerator(
-      connection,
-      'promo',
-      'PR'
-    )
+    const { updateId } = await userNumberGenerator(connection, 'promo', 'PR')
 
     await connection.query(updatePromoSQL, [
-      name?name:oldPromo[0].promo_name,
-      description?description:oldPromo[0].promo_description,
-      value?valuevalue:oldPromo[0].promo_value,
-      is_percentage?is_percentage:oldPromo[0].promo_is_percentage,
-      min_total?min_total:oldPromo[0].promo_min_total,
-      max_discount?max_discount:oldPromo[0].promo_max_discount,
-      min_date?min_date:oldPromo[0].promo_min_date,
-      max_date?max_date:oldPromo[0].promo_max_date,
+      name ? name : oldPromo[0].promo_name,
+      description ? description : oldPromo[0].promo_description,
+      value ? value : oldPromo[0].promo_value,
+      is_percentage ? is_percentage : oldPromo[0].promo_is_percentage,
+      min_total ? min_total : oldPromo[0].promo_min_total,
+      max_discount ? max_discount : oldPromo[0].promo_max_discount,
+      min_date ? min_date : oldPromo[0].promo_min_date,
+      max_date ? max_date : oldPromo[0].promo_max_date,
       updateId,
       new Date(),
       ip,
-      note?note:oldPromo[0].promo_note,
-      status?status:oldPromo[0].promo_status,
-      req.params.id
+      note ? note : oldPromo[0].promo_note,
+      status ? status : oldPromo[0].promo_status,
+      req.params.id,
     ])
 
     retVal.data = {
-      name: name?name:oldPromo[0].promo_name,
-      description: description?description:oldPromo[0].promo_description,
-      value: value?valuevalue:oldPromo[0].promo_value,
-      is_percentage: is_percentage?is_percentage:oldPromo[0].promo_is_percentage,
-      min_total: min_total?min_total:oldPromo[0].promo_min_total,
-      max_discount: max_discount?max_discount:oldPromo[0].promo_max_discount,
-      min_date: min_date?min_date:oldPromo[0].promo_min_date,
-      max_date: max_date?max_date:oldPromo[0].promo_max_date,
+      name: name ? name : oldPromo[0].promo_name,
+      description: description ? description : oldPromo[0].promo_description,
+      value: value ? value : oldPromo[0].promo_value,
+      is_percentage: is_percentage
+        ? is_percentage
+        : oldPromo[0].promo_is_percentage,
+      min_total: min_total ? min_total : oldPromo[0].promo_min_total,
+      max_discount: max_discount
+        ? max_discount
+        : oldPromo[0].promo_max_discount,
+      min_date: min_date ? min_date : oldPromo[0].promo_min_date,
+      max_date: max_date ? max_date : oldPromo[0].promo_max_date,
       updateId,
-      date: new Date(),
+      update_date: new Date(),
       ip,
-      note: note?note:oldPromo[0].promo_note,
-      status: status?status:oldPromo[0].promo_status
+      note: note ? note : oldPromo[0].promo_note,
+      status: status ? status : oldPromo[0].promo_status,
     }
 
     return res.status(retVal.status).json(retVal)
-  }catch(error){
+  } catch (error) {
     return next(error)
   }
 })
+
+module.exports = router
