@@ -181,17 +181,17 @@ router.post('/update/:id', async (req,res, next) => {
 
     //updating data
     await connection.query(updateProductSQL, [
-      name: name?name:oldProduct[0].product_name,
-      type: type?type:oldProduct[0].product_type,
-      price: price?price:oldProduct[0].product_price,
-      brand: brand?brand:oldProduct[0].product_brand,
-      stock: stock?stock:oldProduct[0].product_stock,
-      category: category?category:oldProduct[0].product_category,
+      name?name:oldProduct[0].product_name,
+      type?type:oldProduct[0].product_type,
+      price?price:oldProduct[0].product_price,
+      brand?brand:oldProduct[0].product_brand,
+      stock?stock:oldProduct[0].product_stock,
+      category?category:oldProduct[0].product_category,
       updateId,
       ip,
       new Date(),
-      notes: notes ? notes : oldProduct.product_note,
-      status: status?status:oldProduct[0].product_status,
+      notes ? notes : oldProduct.product_note,
+      status?status:oldProduct[0].product_status,
       req.params.id,
     ])
 

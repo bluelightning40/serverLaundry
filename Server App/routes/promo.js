@@ -70,16 +70,16 @@ router.post('/create', async (req,res,next) => {
       name,
       description,
       value,
-      is_percentage: is_percentage ? is_percentage:null,
-      min_total: min_total ? min_total:null,
-      max_discount: max_discount ? max_discount:null,
-      min_date: min_date ? min_date:null,
-      max_date: max_date ? max_date:null,
+      is_percentage ? is_percentage:null,
+      min_total ? min_total:null,
+      max_discount ? max_discount:null,
+      min_date ? min_date:null,
+      max_date ? max_date:null,
       createId,
       ip,
       updateId,
       ip,
-      note: note? note:null,
+      note? note:null,
       status
     ])
 
@@ -134,19 +134,19 @@ router.post('/update/:id?', async (req,res,next) => {
     )
 
     await connection.query(updatePromoSQL, [
-      name: name?name:oldPromo[0].promo_name,
-      description: description?description:oldPromo[0].promo_description,
-      value: value?valuevalue:oldPromo[0].promo_value,
-      is_percentage: is_percentage?is_percentage:oldPromo[0].promo_is_percentage,
-      min_total: min_total?min_total:oldPromo[0].promo_min_total,
-      max_discount: max_discount?max_discount:oldPromo[0].promo_max_discount,
-      min_date: min_date?min_date:oldPromo[0].promo_min_date,
-      max_date: max_date?max_date:oldPromo[0].promo_max_date,
+      name?name:oldPromo[0].promo_name,
+      description?description:oldPromo[0].promo_description,
+      value?valuevalue:oldPromo[0].promo_value,
+      is_percentage?is_percentage:oldPromo[0].promo_is_percentage,
+      min_total?min_total:oldPromo[0].promo_min_total,
+      max_discount?max_discount:oldPromo[0].promo_max_discount,
+      min_date?min_date:oldPromo[0].promo_min_date,
+      max_date?max_date:oldPromo[0].promo_max_date,
       updateId,
       new Date(),
       ip,
-      note: note?note:oldPromo[0].promo_note,
-      status: status?status:oldPromo[0].promo_status,
+      note?note:oldPromo[0].promo_note,
+      status?status:oldPromo[0].promo_status,
       req.params.id
     ])
 
@@ -160,7 +160,7 @@ router.post('/update/:id?', async (req,res,next) => {
       min_date: min_date?min_date:oldPromo[0].promo_min_date,
       max_date: max_date?max_date:oldPromo[0].promo_max_date,
       updateId,
-      new Date(),
+      date: new Date(),
       ip,
       note: note?note:oldPromo[0].promo_note,
       status: status?status:oldPromo[0].promo_status

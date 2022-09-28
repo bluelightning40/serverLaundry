@@ -26,7 +26,7 @@ router.get('/getDTrans/:id?', async (req,res,next) => {
   }
 
   try{
-    const connection await db
+    const connection = await db
 
     const query = `SELECT * FROM d_trans ${
       req.params.id ? `where FK_h_trans_id = '${req.params.id}'` : ''

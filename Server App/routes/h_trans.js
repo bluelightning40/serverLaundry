@@ -29,7 +29,7 @@ const updateHTransactionSQL = `UPDATE h_trans SET
    }
 
    try{
-     const connection await db
+     const connection = await db
 
      const query = `SELECT * FROM h_trans ${
        req.params.id ? `where h_trans_id = '${req.params.id}'` : ''
