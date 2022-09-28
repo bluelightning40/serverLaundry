@@ -109,7 +109,7 @@ router.post('/createDTrans', async (req, res, next) => {
   }
 })
 
-router.post('/updateDTrans/:id', async (req, res, next) => {
+router.put('/updateDTrans/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }

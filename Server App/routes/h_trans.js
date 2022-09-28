@@ -129,7 +129,7 @@ router.post('/createHTrans', async (req, res, next) => {
   }
 })
 
-router.post('/updateHTrans/:id', async (req, res, next) => {
+router.put('/updateHTrans/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }

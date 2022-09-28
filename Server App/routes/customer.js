@@ -89,7 +89,7 @@ router.post('/create', async (req, res, next) => {
   }
 })
 
-router.post('/update/:id', async (req, res, next) => {
+router.put('/update/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
