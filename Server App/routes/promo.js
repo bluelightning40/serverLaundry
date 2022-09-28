@@ -121,7 +121,7 @@ router.post('/create', async (req, res, next) => {
   }
 })
 
-router.post('/update/:id?', async (req, res, next) => {
+router.post('/update/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
@@ -180,6 +180,9 @@ router.post('/update/:id?', async (req, res, next) => {
         : oldPromo[0].promo_max_discount,
       min_date: min_date ? min_date : oldPromo[0].promo_min_date,
       max_date: max_date ? max_date : oldPromo[0].promo_max_date,
+      createId: oldPromo[0].promo_create_id,
+      create_date: oldPromo[0].promo_create_date,
+      create_ip: oldPromo[0].promo_create_ip,
       updateId,
       update_date: new Date(),
       ip,

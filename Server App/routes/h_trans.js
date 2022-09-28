@@ -129,7 +129,7 @@ router.post('/createHTrans', async (req, res, next) => {
   }
 })
 
-router.post('/updateHTrans/:id?', async (req, res, next) => {
+router.post('/updateHTrans/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
@@ -155,22 +155,25 @@ router.post('/updateHTrans/:id?', async (req, res, next) => {
       updateId,
       new Date(),
       ip,
-      total ? total : oldHTrans.h_trans_total,
-      note ? note : oldHTrans.h_trans_note,
-      progress ? progress : oldHTrans.h_trans_progress,
-      status ? status : oldHTrans.h_trans_status,
+      total ? total : oldHTrans[0].h_trans_total,
+      note ? note : oldHTrans[0].h_trans_note,
+      progress ? progress : oldHTrans[0].h_trans_progress,
+      status ? status : oldHTrans[0].h_trans_status,
       req.params.id,
     ])
 
     retVal.data = {
       id: req.params.id,
-      total: total ? total : oldHTrans.h_trans_total,
+      total: total ? total : oldHTrans[0].h_trans_total,
+      createId: oldHTrans[0].h_trans_create_id,
+      create_date: oldHTrans[0].h_trans_create_date,
+      create_ip: oldHTrans[0].h_trans_create_ip,
       updateId,
       updated_date: new Date(),
       ip,
-      note: note ? note : oldHTrans.h_trans_note,
-      progress: progress ? progress : oldHTrans.h_trans_progress,
-      status: status ? status : oldHTrans.h_trans_status,
+      note: note ? note : oldHTrans[0].h_trans_note,
+      progress: progress ? progress : oldHTrans[0].h_trans_progress,
+      status: status ? status : oldHTrans[0].h_trans_status,
     }
 
     return res.status(retVal.status).json(retVal)
