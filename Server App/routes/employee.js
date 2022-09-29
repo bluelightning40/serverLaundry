@@ -345,44 +345,26 @@ router.put('/update/:id', async (req, res, next) => {
   }
 })
 
-router.put('/delete/:id', async (req, res, next) => {
+router.delete('/delete/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
-  const connection = await db
 
-  try{
-    const[oldEmployee] = await connection.query(
-      `SELECT * FROM employee WHERE employee_id=${req.params.id}`
+  try {
+    const connection = await db
+
+    await connection.query(
+      `UPDATE employee SET employee_status = 0 WHERE employee_id = '${req.params.id}'`
     )
 
-    // Creating ID String
-    const { id, createId, updateId } = await userNumberGenerator(
-      connection,
-      'employee',
-      'E'
+    const [deletedEmployee] = await connection.query(
+      `SELECT * FROM employee WHERE employee_id = '${req.params.id}'`
     )
 
-    await connection.query(updateEmployeeSQL, [
-      name ? name : oldEmployee[0].employee_name,
-      password?password : oldEmployee[0].employee_type,
-      update_ip,
-      new Date(),
-      note ? note : oldEmployee[0].employee_note,
-      0,
-      req.params.id,
-    ])
-
-    retVal.data={
-      id: req.params.id,
-      name: oldEmployee[0].employee_name,
-      user_notes: oldEmployee[0].employee_note,
-      user_status: 0,
-      updated_date: new Date(),
-    }
+    retVal.data = deletedEmployee[0]
 
     return res.status(retVal.status).json(retVal)
-  }catch (error){
+  } catch (error) {
     return next(error)
   }
 })

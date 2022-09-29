@@ -246,4 +246,28 @@ router.put('/update/:id', async (req, res, next) => {
   }
 })
 
+router.delete('/delete/:id', async (req, res, next) => {
+  const retVal = {
+    status: 200,
+  }
+
+  try {
+    const connection = await db
+
+    await connection.query(
+      `UPDATE product SET product_status = 0 WHERE product_id = '${req.params.id}'`
+    )
+
+    const [deletedproduct] = await connection.query(
+      `SELECT * FROM product WHERE product_id = '${req.params.id}'`
+    )
+
+    retVal.data = deletedproduct[0]
+
+    return res.status(retVal.status).json(retVal)
+  } catch (error) {
+    return next(error)
+  }
+})
+
 module.exports = router

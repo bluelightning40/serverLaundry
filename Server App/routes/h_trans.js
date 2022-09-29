@@ -182,4 +182,28 @@ router.put('/updateHTrans/:id', async (req, res, next) => {
   }
 })
 
+router.delete('/delete/:id', async (req, res, next) => {
+  const retVal = {
+    status: 200,
+  }
+
+  try {
+    const connection = await db
+
+    await connection.query(
+      `UPDATE h_trans SET h_trans_status = 0 WHERE h_trans_id = '${req.params.id}'`
+    )
+
+    const [deletedh_trans] = await connection.query(
+      `SELECT * FROM h_trans WHERE h_trans_id = '${req.params.id}'`
+    )
+
+    retVal.data = deletedh_trans[0]
+
+    return res.status(retVal.status).json(retVal)
+  } catch (error) {
+    return next(error)
+  }
+})
+
 module.exports = router

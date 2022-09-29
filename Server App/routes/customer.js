@@ -139,4 +139,27 @@ router.put('/update/:id', async (req, res, next) => {
   }
 })
 
+router.delete('/delete/:id', async (req, res, next) => {
+  const retVal = {
+    status: 200,
+  }
+
+  try {
+    const connection = await db
+
+    await connection.query(
+      `UPDATE customer SET customer_status = 0 WHERE customer_id = '${req.params.id}'`
+    )
+
+    const [deletedcustomer] = await connection.query(
+      `SELECT * FROM customer WHERE customer_id = '${req.params.id}'`
+    )
+
+    retVal.data = deletedcustomer[0]
+
+    return res.status(retVal.status).json(retVal)
+  } catch (error) {
+    return next(error)
+  }
+})
 module.exports = router
