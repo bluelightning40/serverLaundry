@@ -2,13 +2,16 @@ const express = require('express')
 // const multer = require('multer');
 // const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser')
+const { inputChecks } = require('./helper')
+
 const cors = require('cors')
+// const { inputChecks } = require('./helper')
 require('dotenv').config()
 
 const app = express()
 
-app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 // app.use('/uploads', express.static('uploads'))
 
 app.use(cors())
@@ -34,10 +37,14 @@ app.use('/api/transaction/header', htransRouter)
 const dtransRouter = require('./routes/d_trans')
 app.use('/api/transaction/detail', dtransRouter)
 
-app.get('/api/test', (req, res) => {
-  // const name = 'yosua'
-  //   name += 'hellooo'
-  return res.status(200).json('Welcome')
+app.post('/api/test', async (req, res, next) => {
+  const requiredInputs = ['name']
+  try {
+    inputChecks(requiredInputs, req.body)
+    return res.status(200).send('Welcome ' + req.body.name)
+  } catch (error) {
+    return next(error)
+  }
 })
 
 app.listen(3000, () => console.log(`Running...`))

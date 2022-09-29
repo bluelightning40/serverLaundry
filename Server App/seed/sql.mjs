@@ -72,7 +72,6 @@ const createHTransTableSQL = `CREATE TABLE h_trans (
   h_trans_status BOOLEAN NOT NULL,
   FK_customer_id VARCHAR(11) NOT NULL
 )`
-const insertHTransSQL = `INSERT INTO h_trans (h_trans_id, h_trans_main_photo, h_trans_main_note, h_trans_top_photo, h_trans_top_note, h_trans_left_photo, h_trans_left_note, h_trans_right_photo, h_trans_right_note, h_trans_below_photo, h_trans_below_note,h_trans_total, h_trans_create_id, h_trans_create_date, h_trans_create_ip, h_trans_update_id, h_trans_update_date, h_trans_update_ip, h_trans_note, h_trans_status, FK_customer_id) VALUES ?`
 const initialHTransSQL = `INSERT INTO h_trans (h_trans_id, h_trans_main_photo, h_trans_main_note, h_trans_top_photo, h_trans_top_note, h_trans_left_photo, h_trans_left_note, h_trans_right_photo, h_trans_right_note, h_trans_below_photo, h_trans_below_note,h_trans_total, h_trans_create_id, h_trans_create_date, h_trans_create_ip, h_trans_update_id, h_trans_update_date, h_trans_update_ip, h_trans_note, h_trans_status, FK_customer_id) VALUES
 ('T3107220001', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 100000, 'TC3107220001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'C3107220001'),
 ('T1009220001', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 250000, 'TC1009220001', '2022-09-10', '::1', NULL, '2022-09-10', NULL, 'data dummy coba api', 1, 'C3107220001')`
