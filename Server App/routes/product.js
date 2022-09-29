@@ -153,7 +153,7 @@ router.post('/create', async (req, res, next) => {
   }
 })
 
-router.post('/update/:id', async (req, res, next) => {
+router.put('/update/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
@@ -181,7 +181,7 @@ router.post('/update/:id', async (req, res, next) => {
     )
 
     // Creating ID String
-    const { id, updateId } = await userNumberGenerator(
+    const { id,createId, updateId } = await userNumberGenerator(
       connection,
       'product',
       'P'
@@ -204,7 +204,7 @@ router.post('/update/:id', async (req, res, next) => {
       updateId,
       update_ip,
       new Date(),
-      note ? note : oldProduct.product_note,
+      note ? note : oldProduct[0].product_note,
       status ? status : oldProduct[0].product_status,
       req.params.id,
     ])
@@ -217,10 +217,13 @@ router.post('/update/:id', async (req, res, next) => {
       brand,
       stock,
       category,
+      createId: oldProduct[0].product_create_id,
+      create_date: oldProduct[0].product_create_date,
+      create_ip: oldProduct[0].product_create_ip,
       updateId,
-      update_ip,
       updated_date: new Date(),
-      note: note ? note : oldProduct.product_note,
+      update_ip,
+      note: note ? note : oldProduct[0].product_note,
       status: status,
     }
 

@@ -345,4 +345,31 @@ router.put('/update/:id', async (req, res, next) => {
   }
 })
 
+router.put('/delete/:id', async (req, res, next) => {
+  const retVal = {
+    status: 200,
+  }
+
+  const requiredInputs = ['status']
+
+  const connection = await db
+
+  try{
+    inputChecks(requiredInputs, req.body)
+
+    const[oldEmployee] = await connection.query(
+      `SELECT * FROM employee WHERE employee_id=${req.params.id}`
+    )
+
+    // Creating ID String
+    const { id, createId, updateId } = await userNumberGenerator(
+      connection,
+      'product',
+      'P'
+    )
+  }catch (error){
+    return next(error)
+  }
+})
+
 module.exports = router

@@ -109,7 +109,7 @@ router.post('/createDTrans', async (req, res, next) => {
   }
 })
 
-router.post('/updateDTrans/:id?', async (req, res, next) => {
+router.put('/updateDTrans/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
@@ -135,12 +135,12 @@ router.post('/updateDTrans/:id?', async (req, res, next) => {
       updateId,
       new Date(),
       ip,
-      note ? note : oldDTrans.d_trans_note,
-      done ? done : oldDTrans.d_trans_done,
-      quantity ? quantity : oldDTrans.d_trans_quantity,
-      subtotal ? subtotal : oldDTrans.d_trans_subtotal,
-      status ? status : oldDTrans.d_trans_status,
-      employee_id ? employee_id : oldDTrans.FK_employee_id,
+      note ? note : oldDTrans[0].d_trans_note,
+      done ? done : oldDTrans[0].d_trans_done,
+      quantity ? quantity : oldDTrans[0].d_trans_quantity,
+      subtotal ? subtotal : oldDTrans[0].d_trans_subtotal,
+      status ? status : oldDTrans[0].d_trans_status,
+      employee_id ? employee_id : oldDTrans[0].FK_employee_id,
       req.params.id,
     ])
 
@@ -149,14 +149,20 @@ router.post('/updateDTrans/:id?', async (req, res, next) => {
       updateId,
       date: new Date(),
       ip,
-      note: note ? note : oldDTrans.d_trans_note,
-      done: done ? done : oldDTrans.d_trans_done,
-      quantity: quantity ? quantity : oldDTrans.d_trans_quantity,
-      subtotal: subtotal ? subtotal : oldDTrans.d_trans_subtotal,
-      status: status ? status : oldDTrans.d_trans_status,
-      h_product_id: oldDTrans.FK_h_product_id,
-      employee_id: employee_id ? employee_id : oldDTrans.FK_employee_id,
-      h_trans_id: oldDTrans.FK_h_trans_id,
+      note: note ? note : oldDTrans[0].d_trans_note,
+      done: done ? done : oldDTrans[0].d_trans_done,
+      quantity: quantity ? quantity : oldDTrans[0].d_trans_quantity,
+      subtotal: subtotal ? subtotal : oldDTrans[0].d_trans_subtotal,
+      createId: oldDTrans[0].d_trans_create_id,
+      create_date: oldDTrans[0].d_trans_create_date,
+      create_ip: oldDTrans[0].d_trans_create_ip,
+      updateId,
+      update_date: new Date(),
+      update_ip: ip,
+      status: status ? status : oldDTrans[0].d_trans_status,
+      h_product_id: oldDTrans[0].FK_h_product_id,
+      employee_id: employee_id ? employee_id : oldDTrans[0].FK_employee_id,
+      h_trans_id: oldDTrans[0].FK_h_trans_id,
     }
 
     return res.status(retVal.status).json(retVal)
