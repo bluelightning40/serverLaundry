@@ -181,7 +181,7 @@ router.put('/update/:id', async (req, res, next) => {
     )
 
     // Creating ID String
-    const { id, updateId } = await userNumberGenerator(
+    const { id,createId, updateId } = await userNumberGenerator(
       connection,
       'product',
       'P'
