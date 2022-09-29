@@ -349,14 +349,9 @@ router.put('/delete/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
-
-  const requiredInputs = ['status']
-
   const connection = await db
 
   try{
-    inputChecks(requiredInputs, req.body)
-
     const[oldEmployee] = await connection.query(
       `SELECT * FROM employee WHERE employee_id=${req.params.id}`
     )
@@ -364,9 +359,29 @@ router.put('/delete/:id', async (req, res, next) => {
     // Creating ID String
     const { id, createId, updateId } = await userNumberGenerator(
       connection,
-      'product',
-      'P'
+      'employee',
+      'E'
     )
+
+    await connection.query(updateEmployeeSQL, [
+      name ? name : oldEmployee[0].employee_name,
+      password?password : oldEmployee[0].employee_type,
+      update_ip,
+      new Date(),
+      note ? note : oldEmployee[0].employee_note,
+      0,
+      req.params.id,
+    ])
+
+    retVal.data={
+      id: req.params.id,
+      name: oldEmployee[0].employee_name,
+      user_notes: oldEmployee[0].employee_note,
+      user_status: 0,
+      updated_date: new Date(),
+    }
+
+    return res.status(retVal.status).json(retVal)
   }catch (error){
     return next(error)
   }
