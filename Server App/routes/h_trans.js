@@ -11,14 +11,14 @@ const insertHTransactionSQL = `INSERT INTO h_trans
   h_trans_below_photo, h_trans_below_note, h_trans_total,
   h_trans_create_id, h_trans_create_date, h_trans_create_ip,
   h_trans_update_id, h_trans_update_date, h_trans_update_ip,
-  h_trans_note, h_trans_status, FK_customer_id)
+  h_trans_note, h_trans_status, FK_customer_id, FK_promo_id)
   VALUES
-  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 `
 
 const updateHTransactionSQL = `UPDATE h_trans SET
  h_trans_update_id=?, h_trans_update_date=?, h_trans_update_ip=?,
- h_trans_total=?, h_trans_note=?, h_trans_progress=?, h_trans_status=?
+ h_trans_total=?, h_trans_note=?, h_trans_progress=?, h_trans_status=?, FK_promo_id=?
  WHERE
  h_trans_id=?
  `
@@ -59,7 +59,7 @@ router.post('/createHTrans', async (req, res, next) => {
   try {
     inputChecks(requiredInputs, req.body)
 
-    const { total, note, status, customer_id } = req.body
+    const { total, note, status, customer_id, promo_id } = req.body
     const create_ip = req.socket.localAddress
 
     const uploadedImages = []
@@ -102,6 +102,7 @@ router.post('/createHTrans', async (req, res, next) => {
       note,
       status,
       customer_id,
+      promo_id
     ])
 
     const [createdHTrans] = await connection.query(
@@ -135,7 +136,7 @@ router.put('/updateHTrans/:id', async (req, res, next) => {
   }
 
   try {
-    const { total, note, progress, status } = req.body
+    const { total, note, progress, status, promo_id } = req.body
     const ip = req.socket.localAddress
 
     const connection = await db
@@ -159,6 +160,7 @@ router.put('/updateHTrans/:id', async (req, res, next) => {
       note ? note : oldHTrans[0].h_trans_note,
       progress ? progress : oldHTrans[0].h_trans_progress,
       status ? status : oldHTrans[0].h_trans_status,
+      promo_id? promo_id: oldHTrans[0].FK_promo_id,
       req.params.id,
     ])
 
@@ -174,6 +176,7 @@ router.put('/updateHTrans/:id', async (req, res, next) => {
       note: note ? note : oldHTrans[0].h_trans_note,
       progress: progress ? progress : oldHTrans[0].h_trans_progress,
       status: status ? status : oldHTrans[0].h_trans_status,
+      promo_id: promo_id? promo_id: oldHTrans[0].FK_promo_id
     }
 
     return res.status(retVal.status).json(retVal)
