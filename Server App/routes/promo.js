@@ -9,7 +9,7 @@ const insertPromoSQL = `INSERT INTO promo
     promo_max_discount, promo_min_date, promo_max_date,
     promo_create_id, promo_create_ip, promo_update_id,
     promo_update_ip, promo_note, promo_status)
-    VALUE
+    VALUES
     (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 `
 
@@ -29,8 +29,8 @@ router.get('/get/:id?', async (req, res, next) => {
 
   try {
     const connection = await db
-    const query = `SELECT * FROM promo ${
-      req.params.id ? `WHERE promo_id = '${req.params.id}'` : ''
+    const query = `SELECT * FROM promo WHERE promo_status = 1${
+      req.params.id ? `AND promo_id = '${req.params.id}'` : ''
     }`
 
     const [rows] = await connection.query(query)
@@ -97,23 +97,7 @@ router.post('/create', async (req, res, next) => {
       `SELECT * FROM promo WHERE promo_id = '${id}'`
     )
 
-    retVal.data = {
-      id,
-      name,
-      description,
-      value,
-      is_percentage: createdPromo[0].promo_is_percentage,
-      min_total: createdPromo[0].promo_min_total,
-      max_discount: createdPromo[0].promo_max_discount,
-      min_date: createdPromo[0].promo_min_date,
-      max_date: createdPromo[0].promo_max_date,
-      createId,
-      create_ip: ip,
-      updateId,
-      update_ip: ip,
-      note: createdPromo[0].note,
-      status,
-    }
+    retVal.data = createdPromo[0]
 
     return res.status(retVal.status).json(retVal)
   } catch (error) {
@@ -121,7 +105,7 @@ router.post('/create', async (req, res, next) => {
   }
 })
 
-router.post('/update/:id?', async (req, res, next) => {
+router.put('/update/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
@@ -167,25 +151,35 @@ router.post('/update/:id?', async (req, res, next) => {
       req.params.id,
     ])
 
-    retVal.data = {
-      name: name ? name : oldPromo[0].promo_name,
-      description: description ? description : oldPromo[0].promo_description,
-      value: value ? value : oldPromo[0].promo_value,
-      is_percentage: is_percentage
-        ? is_percentage
-        : oldPromo[0].promo_is_percentage,
-      min_total: min_total ? min_total : oldPromo[0].promo_min_total,
-      max_discount: max_discount
-        ? max_discount
-        : oldPromo[0].promo_max_discount,
-      min_date: min_date ? min_date : oldPromo[0].promo_min_date,
-      max_date: max_date ? max_date : oldPromo[0].promo_max_date,
-      updateId,
-      update_date: new Date(),
-      ip,
-      note: note ? note : oldPromo[0].promo_note,
-      status: status ? status : oldPromo[0].promo_status,
-    }
+    const [updatedPromo] = await connection.query(
+      `SELECT * FROM promo WHERE promo_id = '${req.params.id}'`
+    )
+
+    retVal.data = updatedPromo[0]
+
+    return res.status(retVal.status).json(retVal)
+  } catch (error) {
+    return next(error)
+  }
+})
+
+router.delete('/delete/:id', async (req, res, next) => {
+  const retVal = {
+    status: 200,
+  }
+
+  try {
+    const connection = await db
+
+    await connection.query(
+      `UPDATE promo SET promo_status = 0 WHERE promo_id = '${req.params.id}'`
+    )
+
+    const [deletedPromo] = await connection.query(
+      `SELECT * FROM promo WHERE promo_id = '${req.params.id}'`
+    )
+
+    retVal.data = deletedPromo[0]
 
     return res.status(retVal.status).json(retVal)
   } catch (error) {

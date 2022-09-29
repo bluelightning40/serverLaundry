@@ -20,22 +20,41 @@ function inputChecks(
   isStrict = false,
   customError = {
     status: 400,
-    customMessage: `Input ada yang kurang.`,
+    customMessage: `Input ada yang kurang`,
   }
 ) {
   if (Object.keys(body).length === 0) throw customError
 
-  const isAllInputsExist = inputs.every((value) => value in body)
+  const missingInputs = []
+  const isAllInputsExist = inputs.every((value) => {
+    if (value in body) {
+      return true
+    }
+
+    missingInputs.push(value)
+    return false
+  })
   if (!isAllInputsExist)
-    throwError(customError.status, customError.customMessage, true)
+    throwError(
+      customError.status,
+      `${customError.customMessage}: [${missingInputs.join(',')}].`,
+      true
+    )
 
   for (const key in body) {
-    if (!body[key] && body[key] !== false)
-      throwError(customError.status, customError.customMessage, true)
+    if (!body[key] && body[key] !== false) missingInputs.push(key)
+  }
+
+  if (missingInputs.length > 0) {
+    throwError(
+      customError.status,
+      `${customError.customMessage}: [${missingInputs.join(',')}].`,
+      true
+    )
   }
 
   if (isStrict && Object.keys(body).length != inputs.length)
-    throwError(customError.status, customError.customMessage, true)
+    throwError(customError.status, `Banyak input tidak sesuai.`, true)
 
   return true
 }
