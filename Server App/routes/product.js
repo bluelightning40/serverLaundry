@@ -23,7 +23,7 @@ product_update_date=?, product_note=?, product_status=?
 WHERE product_id=?
 `
 
-router.get('/getProduct/:id?', async (req, res, next) => {
+router.get('/get/:id?', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
@@ -31,7 +31,7 @@ router.get('/getProduct/:id?', async (req, res, next) => {
   try {
     const connection = await db
     const query = `SELECT * FROM product ${
-      req.params.id ? `where product_id = '${req.params.id}'` : ''
+      req.params.id ? `WHERE product_status=1 AND product_id = '${req.params.id}'` : ''
     }`
 
     const [rows] = await connection.query(query)
@@ -43,7 +43,7 @@ router.get('/getProduct/:id?', async (req, res, next) => {
   }
 })
 
-router.get('/getHProduct/:id?', async (req, res, next) => {
+router.get('/history/get/:id?', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
@@ -51,7 +51,7 @@ router.get('/getHProduct/:id?', async (req, res, next) => {
   try {
     const connection = await db
     const query = `SELECT * FROM h_product ${
-      req.params.id ? `where FK_product_id = '${req.params.id}'` : ''
+      req.params.id ? `where h_product_status = 1 AND FK_product_id = '${req.params.id}'` : ''
     }`
 
     const [rows] = await connection.query(query)
@@ -67,19 +67,22 @@ router.post('/create', async (req, res, next) => {
   const retVal = {
     status: 201,
   }
-  const requiredInputs = [
-    'name',
-    'type',
-    'price',
-    'stock',
-    'category',
-    'status',
-  ]
+
+  const requiredInputs = ['name','type','price','stock','category','status']
 
   try {
     inputChecks(requiredInputs, req.body)
 
-    const { name, type, price, brand, stock, category, note, status } = req.body
+    const {
+      name,
+      type,
+      price,
+      brand,
+      stock,
+      category,
+      note,
+      status
+    } = req.body
     const create_ip = req.socket.localAddress
 
     const connection = await db
@@ -103,14 +106,14 @@ router.post('/create', async (req, res, next) => {
       name,
       type,
       price,
-      brand,
+      brand?brand:null,
       stock,
       category,
       createId,
       create_ip,
       updateId,
       create_ip,
-      note,
+      note?note:null,
       status,
     ])
 
@@ -122,7 +125,7 @@ router.post('/create', async (req, res, next) => {
       create_ip,
       h_updateId,
       create_ip,
-      note,
+      note?note:null,
       status,
       id,
     ])
@@ -132,20 +135,7 @@ router.post('/create', async (req, res, next) => {
       `SELECT * FROM product WHERE product_id = '${id}'`
     )
 
-    retVal.data = {
-      id,
-      name,
-      type,
-      price,
-      brand,
-      stock,
-      category,
-      createId,
-      create_date: createdProduct[0].product_create_date,
-      create_ip,
-      note: note ? note : null,
-      status: status,
-    }
+    retVal.data = createdProduct[0]
 
     return res.status(retVal.status).json(retVal)
   } catch (error) {
@@ -158,19 +148,18 @@ router.put('/update/:id', async (req, res, next) => {
     status: 200,
   }
 
-  const requiredInputs = [
-    'name',
-    'type',
-    'price',
-    'stock',
-    'category',
-    'status',
-  ]
-
   try {
-    inputChecks(requiredInputs, req.body)
+    const {
+      name,
+      type,
+      price,
+      brand,
+      stock,
+      category,
+      note,
+      status
+    } = req.body
 
-    const { name, type, price, brand, stock, category, note, status } = req.body
     const update_ip = req.socket.localAddress
 
     const connection = await db
@@ -209,23 +198,12 @@ router.put('/update/:id', async (req, res, next) => {
       req.params.id,
     ])
 
-    retVal.data = {
-      id: req.params.id,
-      name,
-      type,
-      price,
-      brand,
-      stock,
-      category,
-      createId: oldProduct[0].product_create_id,
-      create_date: oldProduct[0].product_create_date,
-      create_ip: oldProduct[0].product_create_ip,
-      updateId,
-      updated_date: new Date(),
-      update_ip,
-      note: note ? note : oldProduct[0].product_note,
-      status: status,
-    }
+    const [updatedProduct] = await connection.query(
+      `SELECT * FROM product WHERE prduct_id=?`,
+      req.params.id
+    )
+
+    retVal.data = updatedProduct[0]
 
     //inserting newData to h_product
     await connection.query(insertHProductSQL, [
@@ -258,11 +236,11 @@ router.delete('/delete/:id', async (req, res, next) => {
       `UPDATE product SET product_status = 0 WHERE product_id = '${req.params.id}'`
     )
 
-    const [deletedproduct] = await connection.query(
+    const [deletedProduct] = await connection.query(
       `SELECT * FROM product WHERE product_id = '${req.params.id}'`
     )
 
-    retVal.data = deletedproduct[0]
+    retVal.data = deletedProduct[0]
 
     return res.status(retVal.status).json(retVal)
   } catch (error) {

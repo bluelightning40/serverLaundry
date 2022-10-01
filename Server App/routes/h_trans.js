@@ -23,7 +23,7 @@ const updateHTransactionSQL = `UPDATE h_trans SET
  h_trans_id=?
  `
 
-router.get('/getHTrans/:id?', async (req, res, next) => {
+router.get('/get/:id?', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
@@ -32,7 +32,7 @@ router.get('/getHTrans/:id?', async (req, res, next) => {
     const connection = await db
 
     const query = `SELECT * FROM h_trans ${
-      req.params.id ? `where h_trans_id = '${req.params.id}'` : ''
+      req.params.id ? `WHERE h_trans_status = 1 AND h_trans_id = '${req.params.id}'` : ''
     }`
 
     const [rows] = await connection.query(query)
@@ -44,22 +44,23 @@ router.get('/getHTrans/:id?', async (req, res, next) => {
   }
 })
 
-router.post('/createHTrans', async (req, res, next) => {
+router.post('/create', async (req, res, next) => {
   const retVal = {
     status: 201,
   }
-  const requiredInputs = [
-    'total',
-    'status',
-    'customer_id',
-    'images',
-    'imageNotes',
-  ]
+  const requiredInputs = ['total','status','customer_id','images','imageNotes']
 
   try {
     inputChecks(requiredInputs, req.body)
 
-    const { total, note, status, customer_id, promo_id } = req.body
+    const {
+      total,
+      note,
+      status,
+      customer_id,
+      promo_id
+    } = req.body
+
     const create_ip = req.socket.localAddress
 
     const uploadedImages = []
@@ -109,20 +110,7 @@ router.post('/createHTrans', async (req, res, next) => {
       `SELECT * FROM h_trans WHERE h_trans_id = '${id}'`
     )
 
-    retVal.data = {
-      id,
-      total,
-      createId,
-      create_date: createdHTrans[0].h_trans_create_date,
-      create_ip,
-      updateId,
-      update_date: createdHTrans[0].h_trans_update_date,
-      update_ip: create_ip,
-      note: note ? note : null,
-      proggress: createdHTrans[0].h_trans_progress,
-      status: status,
-      customer_id,
-    }
+    retVal.data = createdHTrans[0]
 
     return res.status(retVal.status).json(retVal)
   } catch (error) {
@@ -130,13 +118,20 @@ router.post('/createHTrans', async (req, res, next) => {
   }
 })
 
-router.put('/updateHTrans/:id', async (req, res, next) => {
+router.put('/update/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
 
   try {
-    const { total, note, progress, status, promo_id } = req.body
+    const {
+      total,
+      note,
+      rogress,
+      status,
+      promo_id
+    } = req.body
+
     const ip = req.socket.localAddress
 
     const connection = await db
@@ -164,20 +159,12 @@ router.put('/updateHTrans/:id', async (req, res, next) => {
       req.params.id,
     ])
 
-    retVal.data = {
-      id: req.params.id,
-      total: total ? total : oldHTrans[0].h_trans_total,
-      createId: oldHTrans[0].h_trans_create_id,
-      create_date: oldHTrans[0].h_trans_create_date,
-      create_ip: oldHTrans[0].h_trans_create_ip,
-      updateId,
-      updated_date: new Date(),
-      ip,
-      note: note ? note : oldHTrans[0].h_trans_note,
-      progress: progress ? progress : oldHTrans[0].h_trans_progress,
-      status: status ? status : oldHTrans[0].h_trans_status,
-      promo_id: promo_id? promo_id: oldHTrans[0].FK_promo_id
-    }
+    const [updatedHTrans] = await connection.query(
+      `SELECT * FROM h_trans WHERE h_trans_id=?`,
+      req.params.id
+    )
+
+    retVal.data = updatedHTrans[0]
 
     return res.status(retVal.status).json(retVal)
   } catch (error) {
