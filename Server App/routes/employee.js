@@ -9,7 +9,7 @@ const insertEmployeeSQL = `INSERT INTO employee (employee_id, employee_name, emp
 const updateEmployeeSQL = `UPDATE employee SET employee_name=?, employee_password=?, employee_update_ip=?, employee_update_date=?, employee_note=?, employee_status=? WHERE employee_id=?`
 const insertEmployeePrivilegeSQL = `INSERT INTO employee_privilege (employee_privilege_id, employee_privilege_create_id, employee_privilege_create_ip, employee_privilege_update_id, employee_privilege_update_ip, employee_privilege_note, employee_privilege_status, FK_employee_id, FK_privilege_id) VALUES (?,?,?,?,?,?,?,?,?)`
 const insertEmployeeLoginSQL = `INSERT INTO employee_login (employee_login_id, FK_employee_id, employee_login_ip, employee_login_status, employee_login_create_id, employee_login_update_id) VALUES (?,?,?,?,?,?)`
-const updateEmployeeLoginSQL = `UPDATE employee_login SET employee_login_status=? WHERE FK_employee_id=? AND empoyee_login_status=1`
+const updateEmployeeLoginSQL = `UPDATE employee_login SET employee_login_status=?, employee_update_id=?, employee_update_ip=? WHERE FK_employee_id=? AND empoyee_login_status=1`
 // Employee Login
 router.post('/login', async (req, res, next) => {
   const retVal = {
@@ -85,12 +85,11 @@ router.post('/logout/:id', async (req, res, next) => {
       'L'
     )
 
-    let query = `SELECT * FROM employee_login WHERE employee_login_status=1 AND FK_employee_id = '${username}'`
+    let query = `SELECT * FROM employee_login WHERE employee_login_status=1 AND FK_employee_id = '${req.params.id}'`
     const [employeeResult] = await connection.query(query)
     if (employeeResult.length === 0) {
       return res.status(404).json({
         status: 404,
-        target: 'ID invalid',
         message: 'ID invalid',
       })
     }
@@ -99,6 +98,8 @@ router.post('/logout/:id', async (req, res, next) => {
     // TODO: Update Table User Login
     await connection.query(updateEmployeeLoginSQL,[
       0,
+      updateId,
+      ip,
       employee.employee_id
     ])
 
