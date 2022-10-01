@@ -41,7 +41,7 @@ router.post('/create', async (req, res, next) => {
     inputChecks(requiredInputs, req.body)
 
     const { name, phone_number, email, address, note, status } = req.body
-    const create_ip = req.socket.localAddress
+    const create_ip = req.ip
 
     const connection = await db
 
@@ -120,7 +120,7 @@ router.put('/update/:id', async (req, res, next) => {
     inputChecks(requiredInputs, req.body)
 
     const { name, phone_number, email, address, notes, status } = req.body
-    const ip = req.socket.localAddress
+    const ip = req.ip
 
     const connection = await db
 

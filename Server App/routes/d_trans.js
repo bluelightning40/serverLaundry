@@ -60,7 +60,7 @@ router.post('/create', async (req, res, next) => {
       h_trans_id
     } = req.body
 
-    const create_ip = req.socket.localAddress
+    const create_ip = req.ip
 
     const connection = await db
 
@@ -111,7 +111,7 @@ router.put('/update/:id', async (req, res, next) => {
       employee_id
     } = req.body
 
-    const ip = req.socket.localAddress
+    const ip = req.ip
 
     const connection = await db
 
