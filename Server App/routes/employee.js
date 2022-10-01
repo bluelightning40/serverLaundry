@@ -1,4 +1,3 @@
-const dayjs = require('dayjs')
 const express = require('express')
 const router = express.Router()
 const db = require('../db')
@@ -27,12 +26,6 @@ router.post('/login', async (req, res, next) => {
 
     const connection = await db
 
-    const { id, createId, updateId } = await userNumberGenerator(
-      connection,
-      'employee_login',
-      'L'
-    )
-
     let query = `SELECT * FROM employee WHERE employee_username = '${username}'`
     const [employeeResult] = await connection.query(query)
     if (employeeResult.length === 0) {
@@ -47,19 +40,22 @@ router.post('/login', async (req, res, next) => {
       password,
       employee.employee_password
     )
-    if (!isValidPass)
-      return res
-        .status(404)
-        .json({ status: 404, target: 'password', message: 'Password salah' })
+    if (!isValidPass) throwError(404, 'Password salah', 'password')
 
     // TODO: Update Table User Login
-    await connection.query(insertEmployeeLoginSQL,[
+    const { id, createId, updateId } = await userNumberGenerator(
+      connection,
+      'employee_login',
+      'L'
+    )
+
+    await connection.query(insertEmployeeLoginSQL, [
       id,
       employee.employee_id,
       ip,
       1,
       createId,
-      updateId
+      updateId,
     ])
 
     retVal.data = employee
@@ -75,32 +71,19 @@ router.post('/logout/:id', async (req, res, next) => {
   }
 
   try {
-    const ip = req.ip
-
     const connection = await db
 
-    const {updateId } = await userNumberGenerator(
-      connection,
-      'employee_login',
-      'L'
-    )
-
-    let query = `SELECT * FROM employee_login WHERE employee_login_status=1 AND FK_employee_id = '${username}'`
+    let query = `SELECT * FROM employee_login WHERE employee_login_status=1 AND FK_employee_id = '${req.params.id}'`
     const [employeeResult] = await connection.query(query)
+
     if (employeeResult.length === 0) {
-      return res.status(404).json({
-        status: 404,
-        target: 'ID invalid',
-        message: 'ID invalid',
-      })
+      throwError(404, 'Id Invalid')
     }
+
     const employee_login = employeeResult[0]
 
     // TODO: Update Table User Login
-    await connection.query(updateEmployeeLoginSQL,[
-      0,
-      employee.employee_id
-    ])
+    await connection.query(updateEmployeeLoginSQL, [0, employee.employee_id])
 
     retVal.data = employee
     return res.status(retVal.status).json(retVal)
@@ -195,8 +178,8 @@ router.post('/create', async (req, res, next) => {
     }
 
     // Insert user_privilege
-    for (let i = 0; i < privileges.length; i++) {
-      const privilege = privileges[i]
+    for (let i = 0; i < (isArray ? privileges.length : 1); i++) {
+      const privilege = isArray ? privileges[i] : privileges
 
       // Creating IDs
       const {
@@ -247,7 +230,7 @@ router.put('/update/:id', async (req, res, next) => {
   try {
     // inputChecks(requiredInputs, req.body)
 
-    const { name, password, note, status, privileges } = req.body
+    const { name, password, note, privileges } = req.body
     const ip = req.ip
 
     await connection.beginTransaction()
@@ -267,40 +250,41 @@ router.put('/update/:id', async (req, res, next) => {
       ip,
       new Date(),
       note ? note : employee[0].employee_note,
-      status,
+      true,
       req.params.id,
     ])
 
-    // Check privilege id
-    const userPrivileges = []
-    // Check if privilege_id is present
-    const [employeePrivilegesQuery] = await connection.query(
-      `SELECT * FROM employee_privilege WHERE FK_employee_id='${req.params.id}'`
+    // get employee privileges
+    const [userPrivileges] = await connection.query(
+      `select e.* from privilege p join employee_privilege e on p.privilege_id = e.FK_privilege_id where e.FK_employee_id = '${req.params.id}'`
     )
 
-    const employeePrivileges = employeePrivilegesQuery.map((privilege) => {
-      return {
-        id: privilege.employee_privilege_id,
-        privilegeId: privilege.FK_privilege_id,
-        status: privilege.employee_privilege_status,
-      }
-    })
+    // const employeePrivileges = employeePrivilegesQuery.map((privilege) => {
+    //   return {
+    //     id: privilege.employee_privilege_id,
+    //     privilegeId: privilege.FK_privilege_id,
+    //     status: privilege.employee_privilege_status,
+    //   }
+    // })
 
-    for (let i = 0; i < employeePrivileges.length; i++) {
-      const employeePrivilege = employeePrivileges[i]
+    // for (let i = 0; i < employeePrivileges.length; i++) {
+    //   const employeePrivilege = employeePrivileges[i]
 
-      const found = privileges.find(
-        (privilege) => privilege === employeePrivilege.privilegeId
-      )
-      if (!found)
-        userPrivileges.push({
-          id: employeePrivilege.privilegeId,
-          type: 'delete',
-        })
-    }
+    //   const found = privileges.find(
+    //     (privilege) => privilege === employeePrivilege.privilegeId
+    //   )
+    //   if (!found)
+    //     userPrivileges.push({
+    //       id: employeePrivilege.privilegeId,
+    //       type: 'delete',
+    //     })
+    // }
 
-    for (let i = 0; i < privileges.length; i++) {
-      const privilege = privileges[i]
+    // Check if input privileges is valid
+    const isArray = Array.isArray(privileges)
+    const endPrivileges = []
+    for (let i = 0; i < (isArray ? privileges.length : 1); i++) {
+      const privilege = isArray ? privileges[i] : privileges
       const [rows] = await connection.query(
         `SELECT * FROM privilege WHERE privilege_id = '${privilege}'`
       )
@@ -311,39 +295,45 @@ router.put('/update/:id', async (req, res, next) => {
 
       let actionType = 'insert'
 
-      const found = employeePrivileges.find(
-        (employeePrivilege) => employeePrivilege.privilegeId == privilege
+      const found = userPrivileges.find(
+        (employeePrivilege) => employeePrivilege.FK_privilege_id == privilege
       )
 
       if (found) {
         actionType = '-'
-        if (found.status === 0) {
+        if (found.employee_privilege_status === 0) {
           actionType = 'update'
         }
       }
 
-      userPrivileges.push({
+      endPrivileges.push({
         id: privilege,
         type: actionType,
       })
     }
 
-    // Update or insert employee_privilege
-    for (let i = 0; i < userPrivileges.length; i++) {
-      const privilege = userPrivileges[i]
-      if (privilege.type === 'insert') {
-        let dateString = dayjs().format('DDMMYY')
-        let query = `SELECT * FROM employee_privilege WHERE employee_privilege_id like 'EP${dateString}%'`
-        const [rows] = await connection.query(query)
+    for (var i = 0; i < userPrivileges.length; i++) {
+      const found = privileges.find(
+        (privilege) => privilege == userPrivileges[i].FK_privilege_id
+      )
 
-        // Creating IDs
-        const employeeNumber = `${dateString}${`${rows.length + 1}`.padStart(
-          3,
-          '0'
-        )}`
-        const employeePrivilegeid = `EP${employeeNumber}`
-        const employeePrivilegeCreateId = `EPC${employeeNumber}`
-        const employeePrivilegeUpdateId = `EPU${employeeNumber}`
+      if (!found) {
+        endPrivileges.push({
+          id: userPrivileges[i].FK_privilege_id,
+          type: 'delete',
+        })
+      }
+    }
+
+    // Update or insert employee_privilege
+    for (let i = 0; i < endPrivileges.length; i++) {
+      const privilege = endPrivileges[i]
+      if (privilege.type === 'insert') {
+        const {
+          id: employeePrivilegeid,
+          createId: employeePrivilegeCreateId,
+          updateId: employeePrivilegeUpdateId,
+        } = await userNumberGenerator(connection, 'employee_privilege', 'EP')
 
         await connection.query(insertEmployeePrivilegeSQL, [
           employeePrivilegeid,
@@ -369,29 +359,20 @@ router.put('/update/:id', async (req, res, next) => {
       }
     }
 
-    const retPrivileges = []
-
-    for (let i = 0; i < userPrivileges.length; i++) {
-      const privilege = userPrivileges[i]
-      if (privilege.type != 'delete') {
-        const [rows] = await connection.query(
-          `SELECT * FROM privilege WHERE privilege_id = '${privilege.id}'`
-        )
-        retPrivileges.push({
-          id: rows[0].privilege_id,
-          name: rows[0].privilege_name,
-        })
-      }
-    }
     await connection.commit()
 
+    const [selectedEmployee] = await connection.query(
+      'SELECT * FROM employee WHERE employee_id = ?',
+      req.params.id
+    )
+
+    const [retPrivileges] = await connection.query(
+      `select p.* from privilege p join employee_privilege e on p.privilege_id = e.FK_privilege_id where e.FK_employee_id = '${req.params.id}'`
+    )
+
     retVal.data = {
-      id: req.params.id,
-      name,
-      user_notes: note,
-      user_status: status,
-      privileges: retPrivileges,
-      updated_date: new Date(),
+      ...selectedEmployee[0],
+      employee_privileges: retPrivileges,
     }
 
     return res.status(retVal.status).json(retVal)
