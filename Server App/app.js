@@ -41,6 +41,7 @@ app.post('/api/test', async (req, res, next) => {
   const requiredInputs = ['name']
   try {
     inputChecks(requiredInputs, req.body)
+    console.log("Welcome " + req.body.list)
     return res.status(200).send('Welcome ' + req.body.list)
   } catch (error) {
     return next(error)
