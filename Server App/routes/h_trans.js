@@ -31,8 +31,8 @@ router.get('/get/:id?', async (req, res, next) => {
   try {
     const connection = await db
 
-    const query = `SELECT * FROM h_trans ${
-      req.params.id ? `WHERE h_trans_status = 1 AND h_trans_id = '${req.params.id}'` : ''
+    const query = `SELECT * FROM h_trans WHERE h_trans_status = 1 ${
+      req.params.id ? ` AND h_trans_id = '${req.params.id}'` : ''
     }`
 
     const [rows] = await connection.query(query)

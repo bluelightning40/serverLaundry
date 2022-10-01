@@ -30,8 +30,8 @@ router.get('/get/:id?', async (req, res, next) => {
 
   try {
     const connection = await db
-    const query = `SELECT * FROM product ${
-      req.params.id ? `WHERE product_status=1 AND product_id = '${req.params.id}'` : ''
+    const query = `SELECT * FROM product WHERE product_status=1 ${
+      req.params.id ? ` AND product_id = '${req.params.id}'` : ''
     }`
 
     const [rows] = await connection.query(query)
@@ -50,8 +50,8 @@ router.get('/history/get/:id?', async (req, res, next) => {
 
   try {
     const connection = await db
-    const query = `SELECT * FROM h_product ${
-      req.params.id ? `where h_product_status = 1 AND FK_product_id = '${req.params.id}'` : ''
+    const query = `SELECT * FROM h_product WHERE h_product_status = 1 ${
+      req.params.id ? ` AND FK_product_id = '${req.params.id}'` : ''
     }`
 
     const [rows] = await connection.query(query)
