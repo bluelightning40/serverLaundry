@@ -64,7 +64,7 @@ router.post('/create', async (req, res, next) => {
       status,
     } = req.body
 
-    const ip = req.socket.localAddress
+    const ip = req.ip
 
     const connection = await db
 
@@ -118,7 +118,7 @@ router.put('/update/:id', async (req, res, next) => {
       note,
       status,
     } = req.body
-    const ip = req.socket.localAddress
+    const ip = req.ip
 
     const connection = await db
 
