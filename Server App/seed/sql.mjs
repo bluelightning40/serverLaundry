@@ -73,7 +73,7 @@ const createHTransTableSQL = `CREATE TABLE h_trans (
   FK_customer_id VARCHAR(11) NOT NULL,
   FK_promo_id VARCHAR(11) DEFAULT NULL
 )`
-const initialHTransSQL = `INSERT INTO h_trans (h_trans_id, h_trans_main_photo, h_trans_main_note, h_trans_top_photo, h_trans_top_note, h_trans_left_photo, h_trans_left_note, h_trans_right_photo, h_trans_right_note, h_trans_below_photo, h_trans_below_note,h_trans_total, h_trans_create_id, h_trans_create_date, h_trans_create_ip, h_trans_update_id, h_trans_update_date, h_trans_update_ip, h_trans_note, h_trans_status, FK_customer_id) VALUES
+const initialHTransSQL = `INSERT INTO h_trans (h_trans_id, h_trans_main_photo, h_trans_main_note, h_trans_top_photo, h_trans_top_note, h_trans_left_photo, h_trans_left_note, h_trans_right_photo, h_trans_right_note, h_trans_below_photo, h_trans_below_note,h_trans_total, h_trans_create_id, h_trans_create_date, h_trans_create_ip, h_trans_update_id, h_trans_update_date, h_trans_update_ip, h_trans_note, h_trans_status, FK_customer_id, FK_promo_id) VALUES
 ('T3107220001', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 100000, 'TC3107220001', '2022-07-31', '192.168.18.36', NULL, NULL, NULL, NULL, 1, 'C3107220001',NULL),
 ('T1009220001', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 250000, 'TC1009220001', '2022-09-10', '::1', NULL, '2022-09-10', NULL, 'data dummy coba api', 1, 'C3107220001',NULL)`
 
@@ -88,8 +88,6 @@ const createPromoTableSQL = `CREATE TABLE promo (
   promo_is_percentage BOOLEAN DEFAULT 1,
   promo_min_total BIGINT(20) DEFAULT NULL,
   promo_max_discount BIGINT(20) DEFAULT NULL,
-  promo_min_date DATETIME DEFAULT NULL,
-  promo_max_date DATETIME DEFAULT NULL,
   promo_create_id VARCHAR(12) NOT NULL,
   promo_create_date DATETIME DEFAULT CURRENT_TIMESTAMP,
   promo_create_ip VARCHAR(15) NOT NULL,
@@ -100,10 +98,10 @@ const createPromoTableSQL = `CREATE TABLE promo (
   promo_status BOOLEAN NOT NULL
 )`
 const initialPromoSQL = `
-  INSERT INTO promo (promo_id, promo_name, promo_description, promo_value, promo_is_percentage, promo_min_total, promo_max_discount, promo_min_date, promo_max_date, promo_create_id, promo_create_ip, promo_update_id, promo_update_ip, promo_note, promo_status) VALUES
-  ('PR170922001', 'Promo Natal', 'Promo khusus hari natal', 15, 1, 100000, 15000, '2022-09-17', '2023-09-17', 'PRC170922001', '::1', 'PRU170922001', '::1', NULL, 1),
-  ('PR170922002', 'Promo Mingguan', 'Promo sekali per minggu', 5, 1, NULL, 35000, '2022-09-17', '2023-09-17', 'PRC170922002', '::1', 'PRU170922002', '::1', NULL, 1),
-  ('PR170922003', 'Promo Harian', 'Promo sekali per hari', 5000, 0, NULL, NULL, '2022-09-17', '2023-09-17', 'PRC170922003', '::1', 'PRU170922003', '::1', NULL, 1)
+  INSERT INTO promo (promo_id, promo_name, promo_description, promo_value, promo_is_percentage, promo_min_total, promo_max_discount, promo_create_id, promo_create_ip, promo_update_id, promo_update_ip, promo_note, promo_status) VALUES
+  ('PR170922001', 'Promo Natal', 'Promo khusus hari natal', 15, 1, 100000, 15000, 'PRC170922001', '::1', 'PRU170922001', '::1', NULL, 1),
+  ('PR170922002', 'Promo Mingguan', 'Promo sekali per minggu', 5, 1, NULL, 35000, 'PRC170922002', '::1', 'PRU170922002', '::1', NULL, 1),
+  ('PR170922003', 'Promo Harian', 'Promo sekali per hari', 5000, 0, NULL, NULL, 'PRC170922003', '::1', 'PRU170922003', '::1', NULL, 1)
 `
 
 // HProduct
@@ -238,15 +236,15 @@ const createEmployeePrivilegeTableSQL = `CREATE TABLE employee_privilege (
   FK_privilege_id VARCHAR(11) NOT NULL
 )`
 const initialEmployeePrivilegeSQL = `INSERT INTO employee_privilege (employee_privilege_id, employee_privilege_create_id, employee_privilege_create_date, employee_privilege_create_ip, employee_privilege_update_id, employee_privilege_update_date, employee_privilege_update_ip, employee_privilege_note, employee_privilege_status, FK_employee_id, FK_privilege_id) VALUES
-('EP310722001', 'EPC310722001', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220001', 'PR310722001'),
-('EP310722002', 'EPC310722002', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722002'),
-('EP310722003', 'EPC310722003', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722003'),
-('EP310722004', 'EPC310722004', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722004'),
-('EP310722005', 'EPC310722005', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722005'),
-('EP310722006', 'EPC310722006', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722006'),
-('EP310722007', 'EPC310722007', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722007'),
-('EP310722008', 'EPC310722008', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722008'),
-('EP310722009', 'EPC310722009', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'U1209220002', 'PR310722009')`
+('EP310722001', 'EPC310722001', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'E1209220001', 'PR310722001'),
+('EP310722002', 'EPC310722002', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'E1209220002', 'PR310722002'),
+('EP310722003', 'EPC310722003', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'E1209220002', 'PR310722003'),
+('EP310722004', 'EPC310722004', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'E1209220002', 'PR310722004'),
+('EP310722005', 'EPC310722005', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'E1209220002', 'PR310722005'),
+('EP310722006', 'EPC310722006', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'E1209220002', 'PR310722006'),
+('EP310722007', 'EPC310722007', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'E1209220002', 'PR310722007'),
+('EP310722008', 'EPC310722008', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'E1209220002', 'PR310722008'),
+('EP310722009', 'EPC310722009', '2022-09-12', '192.168.18.36', NULL, '2022-09-12', NULL, NULL, 1, 'E1209220002', 'PR310722009')`
 
 export const dropTables = {
   dropCustomerTableSQL,

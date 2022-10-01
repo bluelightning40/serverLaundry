@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const db = require('../db')
-const { inputChecks, userNumberGenerator } = require('../helper')
+const { inputChecks, userNumberGenerator, throwError } = require('../helper')
 
 const insertCustomerSQL = `INSERT INTO customer
 (customer_id, customer_name, customer_phone_number, customer_email,
@@ -19,8 +19,8 @@ router.get('/get/:id?', async (req, res, next) => {
 
   try {
     const connection = await db
-    const query = `SELECT * FROM customer ${
-      req.params.id ? `where customer_id = '${req.params.id}'` : ''
+    const query = `SELECT * FROM customer WHERE customer_status = 1 ${
+      req.params.id ? `AND customer_id = '${req.params.id}'` : ''
     }`
     const [rows] = await connection.query(query)
 
@@ -40,10 +40,42 @@ router.post('/create', async (req, res, next) => {
   try {
     inputChecks(requiredInputs, req.body)
 
-    const { name, phone_number, email, address, notes, status } = req.body
+    const { name, phone_number, email, address, note, status } = req.body
     const create_ip = req.socket.localAddress
 
     const connection = await db
+
+    // Check unique email or phone number
+
+    const [samePhoneNumber] = await connection.query(
+      'SELECT * FROM customer WHERE customer_phone_number = ?',
+      phone_number
+    )
+
+    const [sameEmail] = await connection.query(
+      'SELECT * FROM customer WHERE customer_email = ?',
+      email
+    )
+
+    const errorObject = {
+      status: 400,
+      messages: [],
+      target: [],
+    }
+
+    if (samePhoneNumber.length > 0) {
+      errorObject.messages.push('Nomor telepon sudah digunakan')
+      errorObject.target.push('phoneNumber')
+    }
+
+    if (sameEmail.length > 0) {
+      errorObject.messages.push('Email sudah digunakan')
+      errorObject.target.push('email')
+    }
+
+    if (errorObject.messages.length === 0)
+      throwError(errorObject.status, errorObject.messages, errorObject.target)
+
     const { id, createId, updateId } = await userNumberGenerator(
       connection,
       'customer',
@@ -61,7 +93,7 @@ router.post('/create', async (req, res, next) => {
       create_ip,
       updateId,
       create_ip,
-      notes ? notes : null,
+      note ? note : null,
       status,
     ])
 
@@ -70,18 +102,7 @@ router.post('/create', async (req, res, next) => {
       `select * from customer where customer_id='${id}'`
     )
 
-    retVal.data = {
-      id,
-      name,
-      phone_number,
-      email,
-      address,
-      createId,
-      create_date: createdCustomer[0].customer_create_date,
-      create_ip,
-      notes: notes ? notes : null,
-      status: status,
-    }
+    retVal.data = createdCustomer[0]
 
     return res.status(retVal.status).json(retVal)
   } catch (error) {
@@ -121,17 +142,12 @@ router.put('/update/:id', async (req, res, next) => {
       req.params.id,
     ])
 
-    retVal.data = {
-      id: req.params.id,
-      name,
-      phone_number,
-      email,
-      address,
-      ip,
-      updated_date: new Date(),
-      notes: notes ? notes : oldCustomer[0].customer_note,
-      status: status,
-    }
+    // Select created customer for return value
+    const [customer] = await connection.query(
+      `select * from customer where customer_id='${req.params.id}'`
+    )
+
+    retVal.data = customer[0]
 
     return res.status(retVal.status).json(retVal)
   } catch (error) {

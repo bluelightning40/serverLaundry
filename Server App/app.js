@@ -41,7 +41,7 @@ app.post('/api/test', async (req, res, next) => {
   const requiredInputs = ['name']
   try {
     inputChecks(requiredInputs, req.body)
-    return res.status(200).send('Welcome ' + req.body.name)
+    return res.status(200).send('Welcome ' + req.body.list)
   } catch (error) {
     return next(error)
   }
@@ -52,8 +52,12 @@ app.listen(3000, () => console.log(`Running...`))
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error(err.stack)
-  const status = err.status || 500
-  const message = err.customMessage || 'Something went wrong'
+  const retObject = {}
 
-  return res.status(status).json({ status, message })
+  retObject.status = err.status || 500
+  retObject.message = err.customMessage || 'Something went wrong'
+
+  if (err.customTarget) retObject.target = err.customTarget
+
+  return res.status(retObject.status).json(retObject)
 })

@@ -27,14 +27,21 @@ router.post('/login', async (req, res, next) => {
     let query = `SELECT * FROM employee WHERE employee_username = '${username}'`
     const [employeeResult] = await connection.query(query)
     if (employeeResult.length === 0) {
-      throwError(404, 'Username tidak terdaftar')
+      return res.status(404).json({
+        status: 404,
+        target: 'username',
+        message: 'Username tidak terdaftar',
+      })
     }
     const employee = employeeResult[0]
     const isValidPass = await bcrypt.compare(
       password,
       employee.employee_password
     )
-    if (!isValidPass) throwError(400, 'Password salah')
+    if (!isValidPass)
+      return res
+        .status(404)
+        .json({ status: 404, target: 'password', message: 'Password salah' })
 
     // TODO: Update Table User Login
     retVal.data = employee
@@ -52,10 +59,18 @@ router.get('/get/:id?', async (req, res, next) => {
 
   try {
     const connection = await db
-    const query = `SELECT * FROM employee ${
-      req.params.id ? `where employee_id = '${req.params.id}'` : ''
+    const query = `SELECT * FROM employee WHERE employee_status = 1${
+      req.params.id ? `AND employee_id = '${req.params.id}'` : ''
     }`
     const [rows] = await connection.query(query)
+
+    for (let i = 0; i < rows.length; i++) {
+      const employee = rows[i]
+      const [privileges] = await connection.query(
+        `select p.* from privilege p join employee_privilege e on p.privilege_id = e.FK_privilege_id where e.FK_employee_id = '${employee.employee_id}'`
+      )
+      employee.employee_privileges = privileges
+    }
 
     retVal.data = rows
     return res.status(retVal.status).json(retVal)
@@ -69,19 +84,13 @@ router.post('/create', async (req, res, next) => {
   const retVal = {
     status: 201,
   }
-  const requiredInputs = [
-    'name',
-    'username',
-    'password',
-    'status',
-    'privileges',
-  ]
+  const requiredInputs = ['name', 'username', 'password']
 
   const connection = await db
   try {
     inputChecks(requiredInputs, req.body)
 
-    const { name, username, password, notes, status, privileges } = req.body
+    const { name, username, password, note, privileges } = req.body
     const create_ip = req.socket.localAddress
 
     const [employees] = await connection.query(
@@ -89,7 +98,8 @@ router.post('/create', async (req, res, next) => {
     )
     if (employees.length !== 0) {
       // Jika username sudah digunakan
-      throwError(400, 'Username sudah digunakan')
+      // return res.status(retVal.status).json({ target: 'username', message: 'Username sudah digunakan'});
+      throwError(400, 'Username sudah digunakan', 'username')
     }
 
     // Jika unique, create user
@@ -108,39 +118,34 @@ router.post('/create', async (req, res, next) => {
       create_ip,
       employeeUpdateId,
       create_ip,
-      notes ? notes : null,
-      status,
+      note ? note : null,
+      true,
     ])
 
     const userPrivileges = []
-    for (let i = 0; i < privileges.length; i++) {
-      const privilege = privileges[i]
+    const isArray = Array.isArray(privileges)
+    for (let i = 0; i < (isArray ? privileges.length : 1); i++) {
+      const privilege = isArray ? privileges[i] : privileges
       const [rows] = await connection.query(
         `SELECT * FROM privilege WHERE privilege_id = '${privilege}'`
       )
 
       if (rows.length === 0) {
-        throwError(400, 'Privileges tidak valid.', true)
+        throwError(400, 'Privileges tidak valid.', '', true)
       }
-      userPrivileges.push({ id: privilege, name: rows[0].privilege_name })
+      userPrivileges.push(rows[0])
     }
 
     // Insert user_privilege
-    let dateString = dayjs().format('DDMMYY')
-    let query = `SELECT * FROM employee_privilege WHERE employee_privilege_id like 'EP${dateString}%'`
-    const [rows] = await connection.query(query)
-
     for (let i = 0; i < privileges.length; i++) {
       const privilege = privileges[i]
 
       // Creating IDs
-      const employeeNumber = `${dateString}${`${rows.length + 1 + i}`.padStart(
-        3,
-        '0'
-      )}`
-      const employeePrivilegeid = `EP${employeeNumber}`
-      const employeePrivilegeCreateId = `EPC${employeeNumber}`
-      const employeePrivilegeUpdateId = `EPU${employeeNumber}`
+      const {
+        id: employeePrivilegeid,
+        createId: employeePrivilegeCreateId,
+        updateId: employeePrivilegeUpdateId,
+      } = await userNumberGenerator(connection, 'employee_privilege', 'EP')
 
       await connection.query(insertEmployeePrivilegeSQL, [
         employeePrivilegeid,
@@ -156,14 +161,14 @@ router.post('/create', async (req, res, next) => {
     }
     await connection.commit()
 
+    const [selectedEmployee] = await connection.query(
+      'SELECT * FROM employee WHERE employee_id = ?',
+      employeeId
+    )
+
     retVal.data = {
-      id: employeeId,
-      name,
-      username,
-      user_notes: notes,
-      user_status: status,
-      privileges: userPrivileges,
-      created_date: new Date(),
+      ...selectedEmployee[0],
+      employee_privileges: userPrivileges,
     }
 
     return res.status(retVal.status).json(retVal)
@@ -178,20 +183,13 @@ router.put('/update/:id', async (req, res, next) => {
   const retVal = {
     status: 200,
   }
-  const requiredInputs = ['name', 'status', 'privileges']
-
-  // employee_name =?,
-  //   employee_password =?,
-  //   employee_update_ip =?,
-  //   employee_update_date =?,
-  //   employee_note =?,
-  //   employee_status =?
+  // const requiredInputs = ['name', 'status', 'privileges']
 
   const connection = await db
   try {
-    inputChecks(requiredInputs, req.body)
+    // inputChecks(requiredInputs, req.body)
 
-    const { name, password, notes, status, privileges } = req.body
+    const { name, password, note, status, privileges } = req.body
     const ip = req.socket.localAddress
 
     await connection.beginTransaction()
@@ -210,7 +208,7 @@ router.put('/update/:id', async (req, res, next) => {
         : employee[0].employee_password,
       ip,
       new Date(),
-      notes ? notes : employee[0].employee_note,
+      note ? note : employee[0].employee_note,
       status,
       req.params.id,
     ])
@@ -250,7 +248,7 @@ router.put('/update/:id', async (req, res, next) => {
       )
 
       if (rows.length === 0) {
-        throwError(400, 'Privileges tidak valid.', true)
+        throwError(400, 'Privileges tidak valid.', '', true)
       }
 
       let actionType = 'insert'
@@ -332,7 +330,7 @@ router.put('/update/:id', async (req, res, next) => {
     retVal.data = {
       id: req.params.id,
       name,
-      user_notes: notes,
+      user_notes: note,
       user_status: status,
       privileges: retPrivileges,
       updated_date: new Date(),

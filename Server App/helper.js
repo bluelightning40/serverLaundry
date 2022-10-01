@@ -38,6 +38,7 @@ function inputChecks(
     throwError(
       customError.status,
       `${customError.customMessage}: [${missingInputs.join(',')}].`,
+      '',
       true
     )
 
@@ -49,12 +50,13 @@ function inputChecks(
     throwError(
       customError.status,
       `${customError.customMessage}: [${missingInputs.join(',')}].`,
+      '',
       true
     )
   }
 
   if (isStrict && Object.keys(body).length != inputs.length)
-    throwError(customError.status, `Banyak input tidak sesuai.`, true)
+    throwError(customError.status, `Banyak input tidak sesuai.`, '', true)
 
   return true
 }
@@ -99,9 +101,15 @@ async function userNumberGenerator(connection, tableName, prefixId) {
  *
  */
 
-function throwError(statusCode, message, addDocumentation = false) {
+function throwError(
+  statusCode,
+  message,
+  target = '',
+  addDocumentation = false
+) {
   throw {
     status: statusCode,
+    customTarget: target,
     customMessage: `${message} ${
       addDocumentation
         ? `Tolong baca ${process.env.DOCUMENTATION_URL} untuk informasi lebih lanjut.`

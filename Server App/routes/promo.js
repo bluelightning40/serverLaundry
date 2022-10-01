@@ -6,17 +6,17 @@ const { inputChecks, userNumberGenerator } = require('../helper')
 const insertPromoSQL = `INSERT INTO promo
   (promo_id, promo_name, promo_description,
     promo_value, promo_is_percentage, promo_min_total,
-    promo_max_discount, promo_min_date, promo_max_date,
+    promo_max_discount,
     promo_create_id, promo_create_ip, promo_update_id,
     promo_update_ip, promo_note, promo_status)
     VALUES
-    (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    (?,?,?,?,?,?,?,?,?,?,?,?,?)
 `
 
 const updatePromoSQL = `UPDATE promo SET
   promo_name=?, promo_description=?, promo_value=?,
   promo_is_percentage=?, promo_min_total=?, promo_max_discount=?,
-  promo_min_date=?, promo_max_date=?, promo_update_id=?,
+  promo_update_id=?,
   promo_update_date=?, promo_update_ip=?, promo_note=?, promo_status=?
   WHERE
   promo_id=?
@@ -29,7 +29,7 @@ router.get('/get/:id?', async (req, res, next) => {
 
   try {
     const connection = await db
-    const query = `SELECT * FROM promo WHERE promo_status = 1${
+    const query = `SELECT * FROM promo WHERE promo_status = 1 ${
       req.params.id ? `AND promo_id = '${req.params.id}'` : ''
     }`
 
@@ -48,7 +48,7 @@ router.post('/create', async (req, res, next) => {
     status: 201,
   }
 
-  const requiredInputs = ['name', 'description', 'value', 'max_date', 'status']
+  const requiredInputs = ['name', 'description', 'value', 'status']
 
   try {
     inputChecks(requiredInputs, req.body)
@@ -60,8 +60,6 @@ router.post('/create', async (req, res, next) => {
       is_percentage,
       min_total,
       max_discount,
-      min_date,
-      max_date,
       note,
       status,
     } = req.body
@@ -83,8 +81,6 @@ router.post('/create', async (req, res, next) => {
       is_percentage ? is_percentage : null,
       min_total ? min_total : null,
       max_discount ? max_discount : null,
-      min_date ? min_date : null,
-      max_date ? max_date : null,
       createId,
       ip,
       updateId,
@@ -118,8 +114,6 @@ router.put('/update/:id', async (req, res, next) => {
       is_percentage,
       min_total,
       max_discount,
-      min_date,
-      max_date,
       note,
       status,
     } = req.body
@@ -141,8 +135,6 @@ router.put('/update/:id', async (req, res, next) => {
       is_percentage ? is_percentage : oldPromo[0].promo_is_percentage,
       min_total ? min_total : oldPromo[0].promo_min_total,
       max_discount ? max_discount : oldPromo[0].promo_max_discount,
-      min_date ? min_date : oldPromo[0].promo_min_date,
-      max_date ? max_date : oldPromo[0].promo_max_date,
       updateId,
       new Date(),
       ip,
